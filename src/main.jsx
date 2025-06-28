@@ -1,0 +1,143 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { Provider } from 'react-redux'
+import store from './store/store/store.js'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+
+import Login from './pages/Auth/Login.jsx'
+import SignUp from './pages/Auth/SignUp.jsx'
+import NotFound from './pages/404/NotFound.jsx'
+import LandingPage from './pages/landing/LandingPage.jsx'
+
+//swiper library import
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { path } from 'framer-motion/client'
+
+import RoleBasedComponents from './components/routing/RoleBasedComponents.jsx'
+import AdminLayout from './layouts/AdminLayout.jsx'
+
+
+
+const router = createBrowserRouter([
+
+  {
+    path: "/",
+    element: (
+      <App />
+    ),
+    children: [
+      {
+        path: "/",
+        element: (
+          // <AuthLayout authentication={true}>
+          <LandingPage />
+          // </AuthLayout>
+        ),
+      },
+      {
+        path: "/auth/login",
+        element: (
+          // <AuthLayout authentication={true}>
+          <Login />
+          // </AuthLayout>
+        ),
+      },
+      {
+        path: "/auth/sign-up",
+        element: (
+          // <AuthLayout authentication={true}>
+          <SignUp />
+          // </AuthLayout>
+        ),
+      },
+      {
+        path: "/*",
+        element: (
+          <NotFound />
+        ),
+      },
+    ]
+  },
+
+  {
+    path: "/",
+    element: (
+      <AdminLayout />
+    ),
+    children: [
+      {
+        path: "dashboard",
+        element: <RoleBasedComponents route="dashboard" />
+      },
+      {
+        path: "tenants",
+        element: <RoleBasedComponents route="tenants" />
+      },
+      {
+        path: "chat",
+        element: <RoleBasedComponents route="chat" />
+      },
+      {
+        path: "billing",
+        element: <RoleBasedComponents route="billing" />
+      },
+      {
+        path: "booking",
+        element: <RoleBasedComponents route="booking" />
+      },
+      {
+        path: "floor-plan",
+        element: <RoleBasedComponents route="floor-plan" />
+      },
+      {
+        path: "assign-staff",
+        element: <RoleBasedComponents route="assign-staff" />
+      },
+      {
+        path: "staff-manage",
+        element: <RoleBasedComponents route="staff-manage" />
+      },
+      {
+        path: "booking",
+        element: <RoleBasedComponents route="booking" />
+      },
+      {
+        path: "manage-event",
+        element: <RoleBasedComponents route="manage-event" />
+      },
+      {
+        path: "location",
+        element: <RoleBasedComponents route="location" />
+      },
+      {
+        path: "guest-book",
+        element: <RoleBasedComponents route="guest-book" />
+      },
+      {
+        path: "report",
+        element: <RoleBasedComponents route="report" />
+      },
+      {
+        path: "setting",
+        element: <RoleBasedComponents route="setting" />
+      }
+    ]
+  },
+
+]);
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <RouterProvider
+        router={router}
+      // fallbackElement={<Loader />}
+      />
+    </Provider>
+  </React.StrictMode>,
+)
