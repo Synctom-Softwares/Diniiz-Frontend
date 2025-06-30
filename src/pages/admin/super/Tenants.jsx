@@ -1,9 +1,12 @@
 // src/pages/super/Tenants.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DropdownSelect from "../../../components/common/DropdownSelect";
 import GenericTable from "../../../components/common/GenericTable";
 import { superBookingHeadings } from "../../../constants/tableHeadings/superBookingHeadings";
+import Button from '../../../components/common/buttons/MainButton'
+import AddTenantForm from "../../../components/super/addTenant/AddTenantForm";
+
 const dummyTenantData = [
   {
     name: "Café Good Vibes",
@@ -30,23 +33,44 @@ const Tenants = () => {
   const [subscription, setSubscription] = useState("");
   const [plan, setPlan] = useState("");
   const [status, setStatus] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const [filteredData, setFilteredData] = useState(dummyTenantData);
 
   const filterData = () => {
-    // Implement filter logic here
+     let updated = [...dummyTenantData];
+
+    if (subscription) {
+      updated = updated.filter((item) => item.subscriptionType === subscription);
+    }
+    if (plan) {
+      updated = updated.filter((item) => item.plan === plan);
+    }
+    if (status) {
+      updated = updated.filter((item) => item.status === status);
+    }
+
+    setFilteredData(updated);
   };
 
-  return (
-    <div className="p-4 max-w-7xl mx-auto">
-      {/* Top Label */}
-      <h1 className="text-2xl font-semibold text-center mb-6">Tenants Management</h1>
+  // Reset filtered data when all filters are cleared
+  useEffect(() => {
+    if (!subscription && !plan && !status) {
+      setFilteredData(dummyTenantData);
+    }
+  }, [subscription, plan, status]);
 
-      {/* Box Container */}
-      <div className="border rounded-lg shadow bg-white p-4 space-y-6">
+  return (
+    <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff]">
+      {/* Top Label */}
+      <h1 className="text-2xl font-semibold text-center mb-6">Tenant Management</h1>
+
+      <div className=" rounded-2xl shadow bg-white p-4 space-y-6">
 
         {/* Filters + Buttons */}
-        <div className="flex flex-col md:flex-row justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mt-3 mb-10">
           {/* Filter Fields */}
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-2/3">
+          <div className="flex flex-col md:items-center md:flex-row gap-4 w-full md:w-2/3 ">
             <DropdownSelect
               label="Subscription Type"
               options={["Monthly", "Annual"]}
@@ -65,24 +89,33 @@ const Tenants = () => {
               selected={status}
               onChange={setStatus}
             />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 self-end">
-            <button
-              className="bg-primary text-white px-4 py-2 rounded"
+            <Button
+              radius="rounded-xl"
+              className="px-5 py-1 shadow-none"
               onClick={filterData}
             >
               Filter
-            </button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded">
-              + Add Tenant
-            </button>
+            </Button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex">
+
+            <Button
+              radius="rounded-xl"
+              className="px-5 py-1 shadow-none"
+              onClick={() => setShowAddForm(true)}
+            >
+              Add Tenant
+            </Button>
           </div>
         </div>
 
+        <AddTenantForm isOpen={showAddForm} onClose={() => setShowAddForm(false)}  label={"Add Tenant"}/>
+
+
         {/* Table */}
-        <GenericTable columns={superBookingHeadings} data={dummyTenantData} />
+        <GenericTable columns={superBookingHeadings} data={filteredData} />
       </div>
     </div>
   );

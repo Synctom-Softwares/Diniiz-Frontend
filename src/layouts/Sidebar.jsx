@@ -2,6 +2,8 @@
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { adminComponentMap } from '../features/adminComponentMap';
+import logo from '../assets/images/landing/logo.png'
+import { Iconly } from 'react-iconly';
 
 const Sidebar = () => {
   const role = useSelector((state) => state.auth.userData?.role);
@@ -11,19 +13,35 @@ const Sidebar = () => {
     .map(([key, value]) => ({
       path: `/${key}`,
       label: value.label,
+      icon: value.icon
     }));
 
   return (
     <nav className="flex flex-col gap-2 p-4 text-left">
-      {links.map(({ path, label }) => (
+      <div>
+        <img src={logo} alt="" className=' w-24' />
+      </div>
+      {links.map(({ path, label, icon }) => (
         <NavLink
           key={path}
           to={path}
           className={({ isActive }) =>
-            isActive ? 'text-primary font-semibold' : 'text-gray-700'
+            `${isActive ? 'bg-primary text-white' : 'text-textPrimary'}  text-[16px] font-medium p-2 rounded-xl`
           }
         >
-          {label}
+          {({ isActive }) => (
+            <div className='flex items-center gap-3'>
+              <span>
+                <Iconly
+                  name={icon}
+                  set='light' 
+                  secondaryColor={isActive ? 'white' : 'gray'} 
+                  stroke='regular'
+                  size='' />
+              </span>
+              <span className='tracking-wide'>{label}</span>
+            </div>
+          )}
         </NavLink>
       ))}
     </nav>
