@@ -8,12 +8,12 @@ const DropdownSelect = ({ label, options, selected, onChange }) => {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-auto">
             <button
-                className="w-full border border-textSecondary px-2 py-1 rounded-xl flex justify-between items-center bg-white text-[13px] lg:text-[15px]"
+                className="w-full border border-textSecondary px-2 py-1 rounded-xl flex justify-between items-center bg-white text-[13px] lg:text-[14px]"
                 onClick={() => setOpen((prev) => !prev)}
             >
-                <span>{selected || label}</span>
+                <span className='pr-2 text-textPrimary'> {selected || label}</span>
                 <ChevronDown size={16} />
             </button>
             <AnimatePresence>
@@ -30,7 +30,7 @@ const DropdownSelect = ({ label, options, selected, onChange }) => {
                             initial={{ opacity: 0, y: -5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -5 }}
-                            className="absolute z-50 mt-1 w-full bg-white shadow-lg rounded-lg inset-shadow-sm/15 "
+                            className="absolute z-50 mt-1 w-auto py-2 max-w-36 max-h-56 overflow-y-auto min-w-15 bg-white shadow-lg rounded-lg inset-shadow-sm/15 text-left"
                         >
                             {options.map((opt) => (
                                 <li

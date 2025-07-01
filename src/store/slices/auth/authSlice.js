@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     status: JSON.parse(localStorage.getItem("authStatus")) || false,
-    userData: { role: 'super'},
+    userData: { role: 'tenant'},
     primaryPath: 'store',
     token: localStorage.getItem("authToken") || null,
 };

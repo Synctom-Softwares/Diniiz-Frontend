@@ -13,6 +13,30 @@ export const adminComponentMap = {
       location: lazy(() => import('../pages/admin/location/Dashboard')),
     },
   },
+  booking: {
+    label: "Booking",
+    icon: "Bag",
+    roles: {
+      tenant: lazy(() => import('../pages/admin/tenant/Booking')),
+      location: lazy(() => import('../pages/admin/location/Booking')),
+      staff: lazy(() => import('../pages/admin/staff/Booking')),
+    },
+  },
+  'staff-manage': {
+    label: "Manage Staff",
+    icon: "User",
+    roles: {
+      tenant: lazy(() => import('../pages/admin/tenant/StaffManage')),
+      location: lazy(() => import('../pages/admin/location/StaffManage')),
+    },
+  },
+  location: {
+    label: "Location",
+    icon: "Location",
+    roles: {
+      tenant: lazy(() => import('../pages/admin/tenant/Location')),
+    },
+  },
   tenants: {
     label: "Tenants",
     icon: "User",
@@ -44,48 +68,16 @@ export const adminComponentMap = {
       location: lazy(() => import('../pages/admin/location/Report')),
     },
   },
-  setting: {
-    label: "Settings",
-    icon: "Setting",
-    roles: {
-      super: lazy(() => import('../pages/admin/super/Setting')),
-      tenant: lazy(() => import('../pages/admin/tenant/Setting')),
-    },
-  },
-  booking: {
-    label: "Booking",
-    icon: "Category",
-    roles: {
-      tenant: lazy(() => import('../pages/admin/tenant/Booking')),
-      location: lazy(() => import('../pages/admin/location/Booking')),
-      staff: lazy(() => import('../pages/admin/staff/Booking')),
-    },
-  },
-  'staff-manage': {
-    label: "Manage Staff",
-    icon: "Category",
-    roles: {
-      tenant: lazy(() => import('../pages/admin/tenant/StaffManage')),
-      location: lazy(() => import('../pages/admin/location/StaffManage')),
-    },
-  },
-  location: {
-    label: "Locations",
-    icon: "Category",
-    roles: {
-      tenant: lazy(() => import('../pages/admin/tenant/Location')),
-    },
-  },
   api: {
     label: "API Keys",
-    icon: "Category",
+    icon: "Send",
     roles: {
       tenant: lazy(() => import('../pages/admin/tenant/Api')),
     },
   },
   'floor-plan': {
     label: "Floor Plan",
-    icon: "Category",
+    icon: "Document",
     roles: {
       tenant: lazy(() => import('../pages/admin/tenant/FloorPlan')),
       location: lazy(() => import('../pages/admin/location/FloorPlan')),
@@ -113,6 +105,14 @@ export const adminComponentMap = {
     roles: {
       location: lazy(() => import('../pages/admin/location/GuestBook')),
       staff: lazy(() => import('../pages/admin/staff/GuestBook')),
+    },
+  },
+  setting: {
+    label: "Settings",
+    icon: "Setting",
+    roles: {
+      super: lazy(() => import('../pages/admin/super/Setting')),
+      tenant: lazy(() => import('../pages/admin/tenant/Setting')),
     },
   },
   logout: {

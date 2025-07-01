@@ -6,6 +6,9 @@ import GenericTable from "../../../components/common/GenericTable";
 import { superBookingHeadings } from "../../../constants/tableHeadings/superBookingHeadings";
 import Button from '../../../components/common/buttons/MainButton'
 import AddTenantForm from "../../../components/super/addTenant/AddTenantForm";
+import UpgradeDowngradeForm from "../../../components/super/addTenant/UpgradeDowngradeForm";
+import DeleteSuspendForm from "../../../components/super/addTenant/DeleteSuspendForm";
+import ViewAccessEndPoint from "../../../components/super/addTenant/ViewAccessEndPoint";
 
 const dummyTenantData = [
   {
@@ -34,11 +37,16 @@ const Tenants = () => {
   const [plan, setPlan] = useState("");
   const [status, setStatus] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingRowData, setEditingRowData] = useState(null);
+  const [showUpgradeDowngradeForm, setShowUpgradeDowngradeForm] = useState(false);
+  const [showDeleteSuspendForm, setShowDeleteSuspendForm] = useState(false);
+  const [showViewAccessEndPoint, setShowViewAccessEndPoint] = useState(false);
 
   const [filteredData, setFilteredData] = useState(dummyTenantData);
 
   const filterData = () => {
-     let updated = [...dummyTenantData];
+    let updated = [...dummyTenantData];
 
     if (subscription) {
       updated = updated.filter((item) => item.subscriptionType === subscription);
@@ -51,6 +59,19 @@ const Tenants = () => {
     }
 
     setFilteredData(updated);
+  };
+
+  const handleDropdownChange = (option, row) => {
+    if (option === "Edit Detail") {
+      setEditingRowData(row); // Set the data of the row being edited
+      setShowEditForm(true);
+    } else if (option === "Upgrade / Downgrade") {
+      setShowUpgradeDowngradeForm(true)
+    } else if (option === "Suspend / Delete") {
+      setShowDeleteSuspendForm(true)
+    } else if (option === "View Access Endpoint") {
+      setShowViewAccessEndPoint(true)
+    }
   };
 
   // Reset filtered data when all filters are cleared
@@ -111,11 +132,20 @@ const Tenants = () => {
           </div>
         </div>
 
-        <AddTenantForm isOpen={showAddForm} onClose={() => setShowAddForm(false)}  label={"Add Tenant"}/>
+        <AddTenantForm isOpen={showAddForm} onClose={() => setShowAddForm(false)} label={"Add Tenant"} />
+        <AddTenantForm isOpen={showEditForm} onClose={() => setShowEditForm(false)} label={"Edit Tenant"} />
+        <UpgradeDowngradeForm isOpen={showUpgradeDowngradeForm} onClose={() => setShowUpgradeDowngradeForm(false)} label={"Upgrade / Downgrade Account"} />
+        <DeleteSuspendForm isOpen={showDeleteSuspendForm} onClose={() => setShowDeleteSuspendForm(false)} label={"Delete / Suspend Account"} />
+        <ViewAccessEndPoint isOpen={showViewAccessEndPoint} onClose={() => setShowViewAccessEndPoint(false)} label={"End Point Access"} />
 
 
         {/* Table */}
-        <GenericTable columns={superBookingHeadings} data={filteredData} />
+        <GenericTable
+          columns={superBookingHeadings}
+          data={filteredData}
+          actions={["Edit Detail", "Upgrade / Downgrade", "Suspend / Delete", "View Access Endpoint"]}
+          handleDropdownChange={handleDropdownChange}
+        />
       </div>
     </div>
   );

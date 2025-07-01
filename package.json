@@ -12,6 +12,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.1",
     "@tailwindcss/vite": "^4.1.6",
+    "@wojtekmaj/react-daterange-picker": "^6.0.0",
     "clsx": "^2.1.1",
     "cn": "^0.1.1",
     "framer-motion": "^12.12.2",
