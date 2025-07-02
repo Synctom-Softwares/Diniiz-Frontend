@@ -93,7 +93,7 @@ export const adminComponentMap = {
   },
   'manage-event': {
     label: "Manage Events",
-    icon: "Category",
+    icon: "Calendar",
     roles: {
       location: lazy(() => import('../pages/admin/location/ManageEvent')),
       staff: lazy(() => import('../pages/admin/staff/ManageEvent')),
@@ -101,7 +101,7 @@ export const adminComponentMap = {
   },
   'guest-book': {
     label: "Guest Book",
-    icon: "Category",
+    icon: "Paper",
     roles: {
       location: lazy(() => import('../pages/admin/location/GuestBook')),
       staff: lazy(() => import('../pages/admin/staff/GuestBook')),

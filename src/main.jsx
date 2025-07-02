@@ -19,6 +19,7 @@ import { path } from 'framer-motion/client'
 
 import RoleBasedComponents from './components/routing/RoleBasedComponents.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
+import WidgetEntry from './components/reservationwidgets/WidgetEntry.jsx'
 
 
 
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
         ),
       },
     ]
+  },
+  {
+    path: "/reservation-widget",
+    element: <WidgetEntry />
   },
 
   {

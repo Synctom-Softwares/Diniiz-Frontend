@@ -716,13 +716,12 @@ const Booking = () => {
     return (
         <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff]">
             {/* Top Label */}
-            <h1 className="text-2xl font-semibold text-center mb-6">Tenant Management</h1>
+            <h1 className="text-2xl font-semibold text-center mb-6">Reservation</h1>
 
             <div className=" rounded-2xl shadow bg-white p-4 ">
 
                 {/* Filters + Buttons */}
                 <div className="flex flex-col justify-between my-4">
-                    {/* Filter Fields */}
                     <div className="flex  gap-4 text-sm">
                         <Button
                             radius="rounded-xl"

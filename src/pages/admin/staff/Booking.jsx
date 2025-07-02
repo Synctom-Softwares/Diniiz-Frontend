@@ -1,8 +1,11 @@
 import React from 'react'
+import BookingComponent from '../location/Booking'
 
 function Booking() {
   return (
-    <div>Booking</div>
+    <div>
+      <BookingComponent />
+    </div>
   )
 }
 

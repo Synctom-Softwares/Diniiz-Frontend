@@ -4,6 +4,7 @@
 
 @import "tailwindcss";
 
+@plugin 'tailwind-scrollbar';
 
 
 @theme {
@@ -17,6 +18,7 @@
   --color-planButtonBlue: #514883;
   --color-textPrimary: #383838;
   --color-textSecondary: #656565;
+  --color-widgetColor: #c30606;
 
   --animate-float: float 3s ease-in-out infinite;
 
