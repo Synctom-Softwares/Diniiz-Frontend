@@ -1,49 +1,115 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import Api from "../../../config/api";
+import asyncHandler from "../../../utils/asyncHandler";
+
+// Load from localStorage
+const savedStatus = JSON.parse(localStorage.getItem("authStatus"));
+const savedToken = localStorage.getItem("authToken");
+const savedUser = localStorage.getItem("userData");
 
 const initialState = {
-    status: JSON.parse(localStorage.getItem("authStatus")) || false,
-    userData: { role: 'location'},
-    primaryPath: 'store',
-    token: localStorage.getItem("authToken") || null,
+  status: savedStatus || false,
+  userData: savedUser ? JSON.parse(savedUser) : null,
+  token: savedToken || null,
+  role: 'tenant',
+  loading: false,
+  error: null,
 };
 
+// export const refreshTokenAsync = createAsyncThunk(
+//   "auth/refreshToken",
+//   async (_, { rejectWithValue }) => {
+//     const { data, error } = await asyncHandler(() =>
+//       authApi.post("/refresh-token", {
+//         token: localStorage.getItem("authToken"),
+//       })
+//     );
+
+//     if (error) return rejectWithValue(error);
+//     return data;
+//   }
+// );
+
+
+// ✅ Thunk: Login
+export const loginAsync = createAsyncThunk(
+  "auth/loginAsync",
+  async (credentials, { rejectWithValue }) => {
+    const authApi = new Api('api/users/auth/login');
+    const { data, error } = await asyncHandler(() =>
+      authApi.post(credentials)
+    );
+
+    if (error) return rejectWithValue(error);
+    return data;
+  }
+);
+
+// ✅ Thunk: Fetch user (optional)
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (_, { rejectWithValue }) => {
+    const authApi = new Api('api/users/auth/login');
+    const { data, error } = await asyncHandler(() => authApi.get("/me"));
+    if (error) return rejectWithValue(error);
+    return data;
+  }
+);
+
 const authSlice = createSlice({
-    name: "auth",
-    initialState,
-    reducers: {
-        login: (state, action) => {
-            state.status = true;
-            state.userData = action.payload.userData;
-            state.token = action.payload.token;
+  name: "auth",
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.status = false;
+      state.userData = null;
+      state.token = null;
+      state.loading = false;
+      state.error = null;
 
-            localStorage.setItem("authStatus", JSON.stringify(true));
-            localStorage.setItem("userData", JSON.stringify(action.payload.userData));
-            localStorage.setItem("authToken", action.payload.token);
-        },
-        logout: (state) => {
-            state.status = false;
-            state.userData = null;
-            state.token = null;
-
-            // Clear from localStorage
-            localStorage.removeItem("authStatus");
-            localStorage.removeItem("userData");
-            localStorage.removeItem("authToken");
-        },
-        setToken: (state, action) => {
-            state.token = action.payload;
-            localStorage.setItem("authToken", action.payload);
-        },
-        setCurrentUser: (state, action) => {
-            state.userData = action.payload;
-            localStorage.setItem("userData", JSON.stringify(action.payload));
-        },
-        setPrimayPath: (state, action) => {
-            state.primaryPath = action.payload;
-        },
+      localStorage.removeItem("authStatus");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("authToken");
     },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      localStorage.setItem("authToken", action.payload);
+    },
+    setCurrentUser: (state, action) => {
+      state.userData = action.payload;
+      localStorage.setItem("userData", JSON.stringify(action.payload));
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.status = true;
+        state.userData = action.payload.user;
+        state.role = action.payload.user.role;
+        state.token = action.payload.token;
+
+        // Persist
+        localStorage.setItem("authStatus", JSON.stringify(true));
+        localStorage.setItem("userData", JSON.stringify(action.payload.user));
+        localStorage.setItem("authToken", action.payload.token);
+      })
+      .addCase(loginAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || { message: "Login failed" };
+      })
+
+      // Optional: Handle fetch user
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.userData = action.payload;
+      });
+  },
 });
 
-export const { login, logout, setToken, setCurrentUser, setPrimayPath } = authSlice.actions;
+export const { logout, setToken, setCurrentUser } = authSlice.actions;
 
 export default authSlice.reducer;

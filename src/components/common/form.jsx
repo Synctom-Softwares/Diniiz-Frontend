@@ -1,6 +1,7 @@
 import Select from "./Select";
 import Input from "./Input";
 import AuthButton from "./buttons/AuthButton";
+import { useEffect } from "react";
 
 function CommonForm({
   formControls,
@@ -12,6 +13,7 @@ function CommonForm({
   checkButton,
   privacyPolicyText
 }) {
+  
   function renderInputsByComponentType(getControlItem) {
     let element = null;
     const value = formData[getControlItem.name] || "";
@@ -41,7 +43,7 @@ function CommonForm({
                   [getControlItem.name]: event.target.value,
                 })
               }
-              className={"py-6"}
+              className={"py-4"}
             />
           </>
         );
@@ -87,7 +89,10 @@ function CommonForm({
   }
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit({ formData });
+    }}>
       <div className="flex flex-col gap-4">
         {formControls.map((controlItem) => (
           <div className="grid w-full gap-2" key={controlItem.name}>

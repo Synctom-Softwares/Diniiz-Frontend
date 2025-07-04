@@ -6,10 +6,11 @@ import logo from '../assets/images/landing/logo.png'
 import { Iconly } from 'react-iconly';
 
 const Sidebar = () => {
-  const role = useSelector((state) => state.auth.userData?.role);
+  const role = useSelector((state) => state.auth.role);
+  const roles = role?.split('-')[0]
 
   const links = Object.entries(adminComponentMap)
-    .filter(([_, value]) => value.roles[role])
+    .filter(([_, value]) => value.roles[roles])
     .map(([key, value]) => ({
       path: `/${key}`,
       label: value.label,

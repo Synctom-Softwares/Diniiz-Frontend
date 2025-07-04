@@ -11,6 +11,39 @@ const instance = axios.create({
   },
 });
 
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("authToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// ✅ Auto-refresh token on 401
+// instance.interceptors.response.use(
+//   (res) => res,
+//   async (error) => {
+//     const originalRequest = error.config;
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
+//       try {
+//         const refreshResponse = await axios.post(`${BASE_URL}/auth/refresh-token`, {
+//           token: localStorage.getItem("authToken"),
+//         });
+
+//         const newToken = refreshResponse.data?.token;
+//         localStorage.setItem("authToken", newToken);
+//         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+//         return instance(originalRequest);
+//       } catch (err) {
+//         localStorage.clear();
+//         window.location.href = "/auth/login";
+//         return Promise.reject(err);
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
+
 class Api {
   constructor(endpoint) {
     this.endpoint = endpoint;

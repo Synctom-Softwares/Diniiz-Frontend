@@ -45,7 +45,7 @@ const Header = () => {
               {item.label}
             </a>
           ))}
-          <MainButton className="bg-white text-primary px-4" to="/auth/login">Sign In</MainButton>
+          <MainButton className="bg-white text-primary px-4"> <Link to="/auth/login">Sign In</Link></MainButton>
         </nav>
 
         {/* Mobile Menu Icon */}
@@ -94,7 +94,7 @@ const Header = () => {
                     {item.label}
                   </a>
                 ))}
-                <AuthButton to="/auth/login">Sign In</AuthButton>
+                <AuthButton>Sign In</AuthButton>
               </nav>
             </motion.div>
           </>
