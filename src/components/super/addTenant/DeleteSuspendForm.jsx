@@ -6,8 +6,11 @@ import { div } from 'framer-motion/client';
 import { useForm } from 'react-hook-form';
 import Input from '../../common/Input';
 import MainButton from '../../common/buttons/MainButton';
+import { useDispatch } from 'react-redux';
+import { useToast } from '../../common/toast/useToast';
+import { deleteTenant, suspendTenant } from '../../../store/slices/super-admin/tenants/tenantSlice';
 
-const DeleteSuspendForm = ({ isOpen, onClose, label }) => {
+const DeleteSuspendForm = ({ isOpen, onClose, label, id, fetchTenants }) => {
     const {
         register,
         handleSubmit,
@@ -15,9 +18,43 @@ const DeleteSuspendForm = ({ isOpen, onClose, label }) => {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log("Tenant Submitted:", data);
-        // Add API or state logic here
+    const { toast } = useToast();
+
+
+    const dispatch = useDispatch()
+
+    const onSubmit = async (data) => {
+        console.log("Tenant :", data);
+        console.log("Tenant Submitted for deletion:", id);
+
+        let response;
+        if (data.type === "Delete") {
+            response = await dispatch(deleteTenant(id));
+            fetchTenants()
+        } else if (data.type === "Suspend") {
+            response = await dispatch(suspendTenant(id))
+            fetchTenants()
+        } else {
+            toast({
+                title: "Select at least one type",
+                variant: "warning",
+            });
+        }
+
+        if (response.payload?.success === true) {
+            toast({
+                title: response.payload?.message,
+                variant: "success",
+            });
+
+            onClose();
+        } else {
+            toast({
+                title: response.payload?.message,
+                variant: "destructive",
+            });
+            onClose();
+        }
         reset();
         onClose();
     };
@@ -36,7 +73,7 @@ const DeleteSuspendForm = ({ isOpen, onClose, label }) => {
                         />
                         <motion.div
                             initial={{ x: "70%" }}
-                            animate={{ x: 0, opacity:100 }}
+                            animate={{ x: 0, opacity: 100 }}
                             exit={{ x: "70%", opacity: 0 }}
                             transition={{ duration: 0.2 }}
                             className=" z-50 h-auto w-full max-w-md bg-white rounded-4xl shadow-lg p-6 overflow-y-auto"
@@ -62,7 +99,7 @@ const DeleteSuspendForm = ({ isOpen, onClose, label }) => {
                                             </label>
                                         ))}
                                     </div>
-                                    {errors.planType && <p className="text-red-500 text-xs">Select a plan</p>}
+                                    {/* {errors.type && <p className="text-red-500 text-xs">Select a type</p>} */}
                                 </div>
 
                                 <div>
@@ -71,13 +108,13 @@ const DeleteSuspendForm = ({ isOpen, onClose, label }) => {
 
                                 {/* Submit */}
                                 <div className="pt-4 mb-3 flex justify-end gap-3">
-                                    <MainButton 
-                                    onClick={() => {
-                                        onClose()
-                                        reset()
-                                    }} 
-                                    className="bg-gray-600 px-3"
-                                    radius='rounded-xl'
+                                    <MainButton
+                                        onClick={() => {
+                                            onClose()
+                                            reset()
+                                        }}
+                                        className="bg-gray-600 px-3"
+                                        radius='rounded-xl'
                                     >
                                         Cancel
                                     </MainButton>

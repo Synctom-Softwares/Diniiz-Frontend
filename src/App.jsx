@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import './App.css'
-import { useDispatch } from "react-redux";
-import { setCurrentUser, setToken } from "./store/slices/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { getPlans } from './store/slices/plan/planSlice';
 
 
 function App() {
   const dispatch = useDispatch()
-
+  const plans = useSelector(state => state.plan.plans)
+  
+  console.log('plans', plans)
   useEffect(() => {
-  const userData = localStorage.getItem("userData");
-  const token = localStorage.getItem("authToken");
-
-  if (userData && token) {
-    dispatch(setCurrentUser(JSON.parse(userData)));
-    dispatch(setToken(token));
-  }
+}, [dispatch]);
+  useEffect(() => {
+    const response = dispatch(getPlans());
+    
+        if (getPlans.fulfilled.match(response)) {
+          console.log('response', response.payload.plans)
+        }
 }, []);
 
   return (

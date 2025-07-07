@@ -6,8 +6,11 @@ import { div } from 'framer-motion/client';
 import { useForm } from 'react-hook-form';
 import Input from '../../common/Input';
 import MainButton from '../../common/buttons/MainButton';
+import { useSelector } from 'react-redux';
 
 const UpgradeDowngradeForm = ({ isOpen, onClose, label }) => {
+    const plans = useSelector(state => state.plan.plans)
+
     const {
         register,
         handleSubmit,
@@ -51,14 +54,14 @@ const UpgradeDowngradeForm = ({ isOpen, onClose, label }) => {
                                 <div className='flex w-full items-center '>
                                     <label className="w-2/6 text-left text-sm text-textSecondary font-medium">Select Plan Type</label>
                                     <div className="flex gap-4">
-                                        {["Basic", "Premium", "Enterprise"].map((type) => (
-                                            <label key={type} className="flex items-center gap-2 text-sm">
+                                        {plans?.map((plan, i) => (
+                                            <label key={i} className="flex items-center gap-2 text-sm">
                                                 <input
                                                     type="radio"
-                                                    value={type}
+                                                    value={plan._id}
                                                     {...register("planType", { required: true })}
                                                 />
-                                                {type}
+                                                {plan.planName}
                                             </label>
                                         ))}
                                     </div>

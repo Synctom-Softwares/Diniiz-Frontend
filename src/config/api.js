@@ -6,8 +6,9 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const instance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   },
 });
 
@@ -49,18 +50,18 @@ class Api {
     this.endpoint = endpoint;
   }
 
-  async get(params = {}) {
+  async get(endpoint, params = {}) {
     try {
-      const res = await instance.get(this.endpoint, { params });
+      const res = await instance.get(this.endpoint + endpoint, { params });
       return res.data;
     } catch (err) {
       this.handleError(err);
     }
   }
 
-  async getById(id) {
+  async getById(endpoint, id) {
     try {
-      const res = await instance.get(`${this.endpoint}/${id}`);
+      const res = await instance.get(`${this.endpoint}${endpoint}/${id}`);
       return res.data;
     } catch (err) {
       this.handleError(err);
@@ -68,9 +69,10 @@ class Api {
   }
 
   // POST (e.g., create)
-  async post(data = {}) {
+  async post(endpoint, data = {}) {
     try {
-      const res = await instance.post(this.endpoint, data);
+      const res = await instance.post(this.endpoint + endpoint, data
+      );
       return res.data;
     } catch (err) {
       this.handleError(err);
@@ -78,7 +80,7 @@ class Api {
   }
 
   // PUT (e.g., update)
-  async put(id, data = {}) {
+  async put(endpoint, id, data = {}) {
     try {
       const res = await instance.put(`${this.endpoint}/${id}`, data);
       return res.data;
@@ -88,9 +90,9 @@ class Api {
   }
 
   // DELETE
-  async delete(id) {
+  async delete(endpoint, id) {
     try {
-      const res = await instance.delete(`${this.endpoint}/${id}`);
+      const res = await instance.delete(`${this.endpoint}${endpoint}/${id}`);
       return res.data;
     } catch (err) {
       this.handleError(err);

@@ -3,8 +3,10 @@ import CommonForm from "../../components/common/form"
 import { signupFormControls } from "../../features/index";
 // import { login } from "../../store/slices/auth/authSlice";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { signUp } from "../../store/slices/auth/authSlice";
+import { useToast } from "../../components/common/toast/useToast";
 
 const initialState = {
   email: "",
@@ -15,27 +17,32 @@ const initialState = {
 function SignUp() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
-  //   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { loading } = useSelector(state => state.auth)
+  const { toast } = useToast();
 
-  function onSubmit(event) {
-    event.preventDefault();
+  async function onSubmit(event) {
+    // event.preventDefault();
+    const response = await dispatch(signUp(formData));
+    console.log('response', response.payload.success === false)
+    if (response.payload?.success === true) {
+      toast({
+        title: response.payload?.message,
+        variant: "success",
+      });
+      navigate('/')
+    } else {
+      console.log('else')
+      toast({
+        title: response.payload?.message,
+        variant: "destructive",
+      });
+    }
 
-    // dispatch(loginUser(formData)).then((data) => {
-    //   if (data?.payload?.success) {
-    //     toast({
-    //       title: data?.payload?.message,
-    //     });
-    //   } else {
-    //     toast({
-    //       title: data?.payload?.message,
-    //       variant: "destructive",
-    //     });
-    //   }
-    // });
   }
 
   return (
-    <div className="mx-auto h-[95vh] mt-5 w-full max-w-md 
+    <div className="mx-auto h-[95vh] mt-5 w-full max-w-md px-10
         sm:max-w-3xl space-y-6 grid gap-4 grid-cols-1 sm:grid-cols-2
         md:max-w-6xl md:gap-10 md:mt-0 
         lg:max-w-7xl">
@@ -73,10 +80,11 @@ function SignUp() {
           formData={formData}
           setFormData={setFormData}
           onSubmit={onSubmit}
+          loading={loading}
         />
 
         <div className="flex justify-start mt-2">
-          <p className="font-inter text-[#515151] text-[12px] md:text-[14px]">Already have an account? <span className="text-primary">Sign In</span></p>
+          <p className="font-inter text-[#515151] text-[12px] md:text-[14px]">Already have an account? <Link to={"/auth/login"} className="text-primary cursor-pointer">Sign In</Link></p>
 
         </div>
       </div>

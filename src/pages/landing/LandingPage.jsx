@@ -13,7 +13,7 @@ import {
 
 const LandingPage = () => {
   return (
-    <div className="font-inter overflow-x-hidden">
+    <div className="font-inter overflow-x-hidden px-10">
       <div className="">
         <Header />
       </div>

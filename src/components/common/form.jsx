@@ -11,9 +11,10 @@ function CommonForm({
   buttonText,
   isBtnDisabled,
   checkButton,
-  privacyPolicyText
+  privacyPolicyText,
+  loading
 }) {
-  
+
   function renderInputsByComponentType(getControlItem) {
     let element = null;
     const value = formData[getControlItem.name] || "";
@@ -90,8 +91,8 @@ function CommonForm({
 
   return (
     <form onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({ formData });
+      e.preventDefault();
+      onSubmit({ formData });
     }}>
       <div className="flex flex-col gap-4">
         {formControls.map((controlItem) => (
@@ -112,8 +113,13 @@ function CommonForm({
         </div>
       }
 
-      <AuthButton disabled={isBtnDisabled} type="submit" className=" w-full mt-8 py-3 font-inter">
-        {buttonText || "Submit"}
+      <AuthButton disabled={isBtnDisabled} type="submit" className=" w-full mt-8 py-3 font-inter flex items-center justify-center">
+        {loading ?
+          <div className="flex items-center gap-2">
+            <span className="loader w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+            Loading...
+          </div>
+          : <p>{buttonText || "Submit"}</p>}
       </AuthButton>
     </form>
   );

@@ -1,6 +1,6 @@
 
 export const superBookingHeadings = [
-    { key: "name", label: "Name", type: "text" },
+    { key: "tenantName", label: "Name", type: "text" },
     { key: "plan", label: "Plan", type: "text" },
     { key: "subscriptionType", label: "Subscription Type", type: "text" },
     { key: "startDate", label: "Start date", type: "date" },

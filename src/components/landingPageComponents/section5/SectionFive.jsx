@@ -9,7 +9,7 @@ import 'swiper/css';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { plans } from './index';
+import { useSelector } from 'react-redux';
 
 
 const SectionFive = () => {
@@ -18,6 +18,8 @@ const SectionFive = () => {
   const [swiperReady, setSwiperReady] = useState(false);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
+
+  const plans = useSelector(state => state.plan.plans)
 
   return (
     <section className="py md:py-10 px-2 lg:px-16 bg-white">
@@ -73,7 +75,7 @@ const SectionFive = () => {
             nextEl: nextRef.current,
           }}
         >
-          {plans.map((plan, index) => (
+          {plans?.map((plan, index) => (
             <SwiperSlide key={plan.id}>
               <PlanCard plan={plan} billing={billing} index={index} />
             </SwiperSlide>
@@ -84,14 +86,14 @@ const SectionFive = () => {
 
       {/* Tablet: Column layout */}
       <div className="hidden md:flex lg:hidden flex-col gap-6">
-        {plans.map((plan, index) => (
+        {plans?.map((plan, index) => (
           <PlanCard key={plan.id} plan={plan} billing={billing} index={index} />
         ))}
       </div>
 
       {/* Laptop & Desktop: 3 Column Grid */}
       <div className="hidden lg:grid lg:grid-cols-3 gap-6">
-        {plans.map((plan, index) => (
+        {plans?.map((plan, index) => (
           <PlanCard key={plan.id} plan={plan} billing={billing} index={index} />
         ))}
       </div>
@@ -111,12 +113,12 @@ const PlanCard = ({ plan, billing, index }) => (
     <div className="flex-1 md:w-1/2 lg:w-full lg:pt-5">
       <div className="flex justify-between mb-4 w-full">
         <div className='w-4/5 pt-5 pl-5'>
-          <h3 className="text-2xl font-semibold text-left text-textPrimary">{plan.label}</h3>
+          <h3 className="text-2xl font-semibold text-left text-textPrimary">{plan.planName}</h3>
           <p className="text-xs text-justify lg:text-sm text-textSecondary mt-1">{plan.description}</p>
         </div>
 
       </div>
-      <div className="text-2xl text-left pl-5 font-bold text-textPrimary mb-4">{plan.price[billing]}</div>
+      <div className="text-2xl text-left pl-5 font-bold text-textPrimary mb-4">${billing === "monthly" ? plan.pricePerMonth : plan.pricePerYear}</div>
       <PlanButton>Choose Plan</PlanButton>
     </div>
 
@@ -124,7 +126,7 @@ const PlanCard = ({ plan, billing, index }) => (
     <div className="mt-2 md:mt-6 md:ml-6 lg:ml-0 lg:mt-6 md:border-t-0 md:border-l-gray-300 md:border-l lg:border-none pt-6 md:pl-6 lg:pl-0 lg:pt-3 md:w-1/2 lg:w-full md:pb-5">
       <p className="text-sm text-gray-600 mb-3">What’s included:</p>
       <ul className="space-y-2 pl-5">
-        {plan.features.map((feature, i) => (
+        {plan.access?.map((feature, i) => (
           <li key={i} className="flex items-center gap-3 text-xs text-gray-700">
             <CheckCircle className="w-5 h-5 text-textPrimary" /> {feature}
           </li>

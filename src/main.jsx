@@ -21,6 +21,8 @@ import RoleBasedComponents from './components/routing/RoleBasedComponents.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 import WidgetEntry from './components/reservationwidgets/WidgetEntry.jsx'
 
+import { Toaster } from './components/common/toast/Toaster.jsx'
+
 
 
 const router = createBrowserRouter([
@@ -141,8 +143,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Provider store={store}>
       <RouterProvider
         router={router}
-      // fallbackElement={<Loader />}
       />
+      <Toaster />
     </Provider>
   </React.StrictMode>,
 )

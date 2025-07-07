@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Api from "../../../config/api";
+import authApi from "../../../config/authApi";
 import asyncHandler from "../../../utils/asyncHandler";
 
 // Load from localStorage
@@ -11,7 +12,7 @@ const initialState = {
   status: savedStatus || false,
   userData: savedUser ? JSON.parse(savedUser) : null,
   token: savedToken || null,
-  role: 'tenant',
+  role: 'super',
   loading: false,
   error: null,
 };
@@ -35,9 +36,20 @@ const initialState = {
 export const loginAsync = createAsyncThunk(
   "auth/loginAsync",
   async (credentials, { rejectWithValue }) => {
-    const authApi = new Api('api/users/auth/login');
     const { data, error } = await asyncHandler(() =>
-      authApi.post(credentials)
+      authApi.post('/login', credentials)
+    );
+
+    if (error) return rejectWithValue(error);
+    return data;
+  }
+);
+
+export const signUp = createAsyncThunk(
+  "auth/signUp",
+  async (credentials, { rejectWithValue }) => {
+    const { data, error } = await asyncHandler(() =>
+      authApi.post('/registeration', credentials)
     );
 
     if (error) return rejectWithValue(error);
@@ -101,6 +113,19 @@ const authSlice = createSlice({
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || { message: "Login failed" };
+      })
+      // sign up
+      .addCase(signUp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signUp.fulfilled, (state, action) => {
+        state.loading = false;
+        state.status = true;
+      })
+      .addCase(signUp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || { message: "Sign up failed" };
       })
 
       // Optional: Handle fetch user

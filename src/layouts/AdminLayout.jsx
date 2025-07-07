@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
+import { useDispatch } from 'react-redux';
+import { getPlans } from '../store/slices/plan/planSlice';
 
 const AdminLayout = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+      const response = dispatch(getPlans());
+      
+          if (getPlans.fulfilled.match(response)) {
+            console.log('response', response.payload.plans)
+          }
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden">

@@ -20,6 +20,25 @@
   --color-textSecondary: #656565;
   --color-widgetColor: #c30606;
 
+
+  --color-toast-background: 0 0% 100%;
+  --color-toast-foreground: 222.2 84% 4.9%;
+  --color-toast-card: 0 0% 100%;
+  --color-toast-card-foreground: 222.2 84% 4.9%;
+  --color-toast-popover: 0 0% 100%;
+  --color-toast-popover-foreground: 222.2 84% 4.9%;
+  --color-toast-primary: 345 100% 25%;
+  --color-toast-primary-foreground: 210 40% 98%;
+  --color-toast-secondary: 210 40% 96.1%;
+  --color-toast-secondary-foreground: 222.2 47.4% 11.2%;
+  --color-toast-muted: 210 40% 96.1%;
+  --color-toast-muted-foreground: 215.4 16.3% 46.9%;
+  --color-toast-accent: 210 40% 96.1%;
+  --color-toast-accent-foreground: 222.2 47.4% 11.2%;
+  --color-toast-destructive: 0 84.2% 60.2%;
+  --color-toast-destructive-foreground: 210 40% 98%;
+  --color-toast-border: 214.3 31.8% 91.4%;
+
   --animate-float: float 3s ease-in-out infinite;
 
   @keyframes float {
@@ -44,6 +63,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
