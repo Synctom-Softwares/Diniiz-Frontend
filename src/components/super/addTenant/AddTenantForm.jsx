@@ -147,7 +147,7 @@ const AddTenantForm = ({ isOpen, onClose, label, fetchTenants, initialData }) =>
                                 </div>
 
                                 {/* Plan Type */}
-                                <div className='flex w-full items-center'>
+                                {/* <div className='flex w-full items-center'>
                                     <label className="w-2/6 text-left text-sm text-textSecondary font-medium">Plan Type</label>
                                     <div className="flex gap-4">
                                         {plans?.map((plan, i) => (
@@ -162,8 +162,8 @@ const AddTenantForm = ({ isOpen, onClose, label, fetchTenants, initialData }) =>
                                             </label>
                                         ))}
                                     </div>
-                                    {/* {errors.planType && <p className="text-red-500 text-xs">Select a plan</p>} */}
-                                </div>
+                                    {errors.planType && <p className="text-red-500 text-xs">Select a plan</p>} */}
+                                {/* </div> */}
 
                                 {/* Subscription Type */}
                                 <div className='flex w-full items-center'>
@@ -203,26 +203,6 @@ const AddTenantForm = ({ isOpen, onClose, label, fetchTenants, initialData }) =>
                                     {/* {errors.status && <p className="text-red-500 text-xs">Select a status</p>} */}
                                 </div>
 
-                                {/* Dates */}
-                                <div className="flex items-center justify-center gap-3 w-full">
-                                    <div className="flex items-center justify-center w-1/2">
-                                        <label className="w-2/5 text-left text-sm text-textSecondary font-medium mb-1">Start Date</label>
-                                        <input
-                                            type="date"
-                                            className="w-3/5  text-xs border border-gray-400 px-3 py-2 rounded"
-                                            {...register("startDate", { required: "Start date is required" })}
-                                        />
-                                    </div>
-                                    {/* {errors.startDate && <p className="text-red-500 text-xs">{errors.startDate.message}</p>} */}
-                                    <div className="flex items-center justify-center w-1/2">
-                                        <label className="w-2/5 text-left text-sm text-textSecondary font-medium mb-1">End Date</label>
-                                        <input
-                                            type="date"
-                                            className="w-3/5 text-xs border border-gray-400 px-3 py-2 rounded"
-                                            {...register("nextBillingDate")}
-                                        />
-                                    </div>
-                                </div>
 
 
                                 {/* Submit */}

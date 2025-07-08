@@ -2,7 +2,7 @@
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { adminComponentMap } from '../features/adminComponentMap';
-import logo from '../assets/images/landing/logo.png'
+import logo from '../assets/images/landing/textLogo.svg'
 import { Iconly } from 'react-iconly';
 
 const Sidebar = () => {
@@ -18,9 +18,9 @@ const Sidebar = () => {
     }));
 
   return (
-    <nav className="flex flex-col gap-2 p-4 text-left">
-      <div>
-        <img src={logo} alt="" className=' w-24' />
+    <nav className="flex flex-col gap-2 px-4 text-left">
+      <div className=' flex justify-start'>
+        <img src={logo} alt="" className=' w-28' />
       </div>
       {links.map(({ path, label, icon }) => (
         <NavLink

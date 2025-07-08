@@ -12,7 +12,7 @@ const initialState = {
   status: savedStatus || false,
   userData: savedUser ? JSON.parse(savedUser) : null,
   token: savedToken || null,
-  role: 'super',
+  role: JSON.parse(savedUser).role || '',
   loading: false,
   error: null,
 };

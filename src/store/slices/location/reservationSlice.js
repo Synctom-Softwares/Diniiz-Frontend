@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Api from "../../../config/api";
-import locationApi from "../../../../config/locationApi";
+import locationApi from "../../../config/locationApi";
 import asyncHandler from "../../../utils/asyncHandler";
+import reservationApi from "../../../config/reservationApi";
 
 
 const initialState = {
@@ -12,25 +13,35 @@ const initialState = {
 };
 
 
-
-// ✅ Thunk: Login
 export const getAllReservations = createAsyncThunk(
-  "reservations/getAllReservations",
-  async (_, { rejectWithValue }) => {
+  "reservation/getAllReservations",
+  async (locationId, { rejectWithValue }) => {
     const { data, error } = await asyncHandler(() =>
-      locationApi.get('/reservations') // TODO: change route
+      locationApi.get(`/${locationId}/reservations`)
     );
-
+    console.log('data', data)
     if (error) return rejectWithValue(error);
-    return data;
+    return {
+      reservations: data?.reservations?.map(r => ({
+        bookingId: r._id,
+        customerName: r.customer?.customerName,
+        partySize: r.partySize,
+        customerType: r.customer?.customerType,
+        date: new Date(r.date).toLocaleDateString(),
+        time: r.time,
+        table: r.tableId,
+        source: r.source,
+        action: null
+      }))
+    };
   }
 );
 
 export const createReservation = createAsyncThunk(
-  "reservations/createReservation",
-  async (_, { rejectWithValue }) => {
+  "reservation/createReservation",
+  async ({ locationId, tableId, body }, { rejectWithValue }) => {
     const { data, error } = await asyncHandler(() =>
-      locationApi.Post('/reservation', data) // TODO: change route
+      reservationApi.post(`/locations/${locationId}/tables/${tableId}`, body) 
     );
 
     if (error) return rejectWithValue(error);
@@ -39,7 +50,7 @@ export const createReservation = createAsyncThunk(
 );
 
 export const editReservation = createAsyncThunk(
-  "reservations/editReservation",
+  "reservation/editReservation",
   async (_, { rejectWithValue }) => {
     const { data, error } = await asyncHandler(() =>
       locationApi.put('/reservation', data) // TODO: change route
@@ -52,7 +63,7 @@ export const editReservation = createAsyncThunk(
 
 
 const reservationSlice = createSlice({
-  name: "reservations",
+  name: "reservation",
   initialState,
   reducers: {
     logout: (state) => {
@@ -66,14 +77,6 @@ const reservationSlice = createSlice({
       localStorage.removeItem("userData");
       localStorage.removeItem("authToken");
     },
-    setToken: (state, action) => {
-      state.token = action.payload;
-      localStorage.setItem("authToken", action.payload);
-    },
-    setCurrentUser: (state, action) => {
-      state.userData = action.payload;
-      localStorage.setItem("userData", JSON.stringify(action.payload));
-    }
   },
   extraReducers: (builder) => {
     builder
@@ -84,7 +87,7 @@ const reservationSlice = createSlice({
       .addCase(getAllReservations.fulfilled, (state, action) => {
         state.loading = false;
         state.status = true;
-        state.tenants = action.payload.tenants;
+        state.allReservations = action.payload.reservations;
 
       })
       .addCase(getAllReservations.rejected, (state, action) => {
@@ -92,6 +95,7 @@ const reservationSlice = createSlice({
         state.error = action.payload || { message: "Fetching reservations failed" };
       })
 
+      //create reservation
       .addCase(createReservation.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -99,14 +103,13 @@ const reservationSlice = createSlice({
       .addCase(createReservation.fulfilled, (state, action) => {
         state.loading = false;
         state.status = true;
-        // state.tenants = action.payload.tenants;
 
       })
       .addCase(createReservation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || { message: "Creating reservation failed" };
       })
-      
+
       .addCase(editReservation.pending, (state) => {
         state.loading = true;
         state.error = null;

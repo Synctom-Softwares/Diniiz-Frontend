@@ -131,8 +131,6 @@ const Tenants = () => {
   })
 
   useEffect(() => {
-
-
     fetchTenants();
   }, [dispatch, fetchTenants]);
 
