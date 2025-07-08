@@ -11,8 +11,6 @@ const initialState = {
   error: null,
 };
 
-
-
 // ✅ Thunk: Login
 export const getAllReservations = createAsyncThunk(
   "reservations/getAllReservations",

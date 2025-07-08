@@ -140,7 +140,7 @@ const tenantSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    //get all tenants
+      //get all tenants
       .addCase(getAllTenants.pending, (state) => {
         state.loading = true;
         state.error = null;

@@ -5,9 +5,10 @@ import { Suspense } from 'react';
 const RoleBasedComponents = ({ route }) => {
   const {userData, role } = useSelector((state) => state.auth);
 // const role = "super"
-  const roles = role?.split("-")[0]
 
-  if (!userData || !role) return <div className="p-4 text-red-500">Unauthorized</div>;
+  const roles = userData?.role?.split("-")[0]
+
+  if (!userData || !roles) return <div className="p-4 text-red-500">Unauthorized</div>;
 
   const Component = adminComponentMap[route]?.roles?.[roles];
 
