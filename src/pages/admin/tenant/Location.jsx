@@ -47,7 +47,7 @@ const LocationList = () => {
   } = useSelector((state) => state.auth);
 
   // Initialize API instance
-  const locationApi = new Api(`/api/tenants/${tenantId}/locations`);
+  const locationApi = new Api(`/api/locations/all/tenants/${tenantId}`);
   const userApi = new Api("/api/users");
 
   const [formData, setFormData] = useState({
