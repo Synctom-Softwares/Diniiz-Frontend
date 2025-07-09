@@ -1,4 +1,4 @@
-import logo from '../../../assets/images/landing/logo.png';
+import logo from '../../../assets/images/landing/textLogo.svg';
 
 export const logos = [
   logo,

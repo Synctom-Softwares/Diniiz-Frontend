@@ -6,10 +6,10 @@ import { Provider } from 'react-redux'
 import store from './store/store/store.js'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
-import Login from './pages/Auth/Login.jsx'
-import SignUp from './pages/Auth/SignUp.jsx'
-import NotFound from './pages/404/NotFound.jsx'
-import LandingPage from './pages/landing/LandingPage.jsx'
+import Login from '../src/pages/auth/Login.jsx'
+import SignUp from '../src/pages/auth/SignUp.jsx'
+import NotFound from '../src/pages/404/NotFound.jsx'
+import LandingPage from '../src/pages/landing/LandingPage.jsx'
 
 //swiper library import
 import "swiper/css";
@@ -17,12 +17,15 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { path } from 'framer-motion/client'
 
-import RoleBasedComponents from './components/routing/RoleBasedComponents.jsx'
-import AdminLayout from './layouts/AdminLayout.jsx'
-import WidgetEntry from './components/reservationwidgets/WidgetEntry.jsx'
+import RoleBasedComponents from '../src/components/routing/RoleBasedComponents.jsx'
+import AdminLayout from '../src/layouts/AdminLayout.jsx'
+import WidgetEntry from '../src/components/reservationwidgets/WidgetEntry.jsx'
 
-import { Toaster } from './components/common/toast/Toaster.jsx'
 import { ToastContainer } from 'react-toastify'
+
+import { Toaster } from '../src/components/common/toast/Toaster.jsx'
+import SuccessPage from '../src/pages/payment/SuccessPage.jsx'
+import FailurePage from '../src/pages/payment/FailurePage.jsx'
 
 
 
@@ -69,6 +72,14 @@ const router = createBrowserRouter([
   {
     path: "/reservation-widget",
     element: <WidgetEntry />
+  },
+  {
+    path: "/payment/success",
+    element: <SuccessPage />
+  },
+  {
+    path: "/payment/fail",
+    element: <FailurePage />
   },
 
   {
@@ -132,6 +143,10 @@ const router = createBrowserRouter([
       {
         path: "setting",
         element: <RoleBasedComponents route="setting" />
+      },
+      {
+        path: "logout",
+        element: <RoleBasedComponents route="logout" />
       }
     ]
   },

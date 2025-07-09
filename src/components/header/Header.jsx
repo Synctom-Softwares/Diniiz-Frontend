@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthButton from "../common/buttons/AuthButton"
 import MainButton from "../common/buttons/MainButton";
-import { Menu, X } from "lucide-react";
+import { LayoutDashboardIcon, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "../../assets/images/landing/logo.png"
+import logo from "../../assets/images/landing/textLogo.svg"
+import { useSelector } from "react-redux";
+import { useToast } from "../common/toast/useToast";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+
+  const { status, userData } = useSelector(state => state.auth)
+  const navigate = useNavigate()
 
   const navItems = [
     { label: "Overview", href: "#overview" },
@@ -16,6 +21,17 @@ const Header = () => {
     { label: "Pricing", href: "#pricing" },
     { label: "Contact Us", href: "#contact" },
   ];
+
+  const { toast } = useToast()
+
+  const handleDashboardIcon = () => {
+    if (status && userData?.role !== "customer") {
+      navigate("/dashboard")
+    } else {
+      toast({ title: 'Dashboard is not available for customer', variant: 'warning' });
+      return;
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,22 +46,24 @@ const Header = () => {
 
   return (
     <>
-      <header 
-      className={`w-full px-3 md:px-10 flex justify-between items-center md:py-10 h-16 transition-transform duration-300 ${isSticky ? `` : 'absolute top-0 z-50 left-0'}`}
+      <header
+        className={`w-full px-3 md:px-10 flex justify-between items-center md:py-10 h-16 transition-transform duration-300 ${isSticky ? `` : 'absolute top-0 z-50 left-0'}`}
       // className="w-full px-3 md:px-16 py-6 flex justify-between items-center bg-transparent top-0 left-0 z-50 "
       >
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold ">
-          <img src={logo} alt="" />
+          <img src={logo} alt="" className="h-28 w-28 bg-amber-00" />
         </Link>
 
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-white lg:text-[18px]">
           {navItems.map((item) => (
-            <a key={item.href} href={item.href} className="hover:text-primary transition">
+            <a key={item.href} href={item.href} className="hover:scale-105 transition">
               {item.label}
             </a>
           ))}
-          <MainButton className="bg-white text-primary px-4"> <Link to="/auth/login">Sign In</Link></MainButton>
+          {
+            status ? <button className="cursor-pointer" onClick={handleDashboardIcon}> <LayoutDashboardIcon /> </button> : <MainButton className="bg-white text-primary px-4"> <Link to="/auth/login">Sign In</Link></MainButton>
+          }
         </nav>
 
         {/* Mobile Menu Icon */}
@@ -94,7 +112,7 @@ const Header = () => {
                     {item.label}
                   </a>
                 ))}
-                <AuthButton>Sign In</AuthButton>
+                <AuthButton><Link to="/auth/login">Sign In</Link></AuthButton>
               </nav>
             </motion.div>
           </>

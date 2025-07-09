@@ -4,7 +4,7 @@ import TestimonialSlider from "./TestimonialSlider";
 
 const SectionFour = () => {
   return (
-    <section className="bg-gray-50 z-0">
+    <section className=" z-0">
       <HeroBlock />
       <TestimonialSlider />
     </section>

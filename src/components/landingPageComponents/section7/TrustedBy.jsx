@@ -33,7 +33,7 @@ const TrustedBy = () => {
                 key={index}
                 src={src}
                 alt={`Company logo ${index}`}
-                className="h-10 md:h-14 lg:h-16 w-auto object-contain"
+                className="h-10 md:h-14 lg:h-20 w-auto object-contain"
               />
             ))}
           </div>

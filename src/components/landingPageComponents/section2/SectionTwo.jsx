@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const SectionTwo = () => {
     return (
-        <section className="w-full px-3 md:px-16 py-5 bg-white">
+        <section id="overview" className="w-full px-3 md:px-16 py-5 bg-white">
             {/* First Row */}
             <motion.div
                 initial="hidden"

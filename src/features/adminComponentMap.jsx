@@ -122,10 +122,10 @@ export const adminComponentMap = {
     label: "Logout",
     icon: "Logout",
     roles: {
-      super: () => <div>Logout</div>,
-      tenant: () => <div>Logout</div>,
-      location: () => <div>Logout</div>,
-      staff: () => <div>Logout</div>,
+      super: lazy(() => import('../components/common/Logout')),
+      tenant: lazy(() => import('../components/common/Logout')),
+      location: lazy(() => import('../components/common/Logout')),
+      staff: lazy(() => import('../components/common/Logout')),
     },
   },
 };
