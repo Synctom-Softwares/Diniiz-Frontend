@@ -21,6 +21,8 @@ import RoleBasedComponents from '../src/components/routing/RoleBasedComponents.j
 import AdminLayout from '../src/layouts/AdminLayout.jsx'
 import WidgetEntry from '../src/components/reservationwidgets/WidgetEntry.jsx'
 
+import { ToastContainer } from 'react-toastify'
+
 import { Toaster } from '../src/components/common/toast/Toaster.jsx'
 import SuccessPage from '../src/pages/payment/SuccessPage.jsx'
 import FailurePage from '../src/pages/payment/FailurePage.jsx'
@@ -159,6 +161,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         router={router}
       />
       <Toaster />
+      <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          style={{
+            zIndex: 9999
+          }}
+        />
     </Provider>
   </React.StrictMode>,
 )

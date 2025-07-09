@@ -11,6 +11,7 @@ export const adminComponentMap = {
       super: lazy(() => import('../pages/admin/super/Dashboard')),
       tenant: lazy(() => import('../pages/admin/tenant/Dashboard')),
       location: lazy(() => import('../pages/admin/location/Dashboard')),
+      staff: lazy(() => import('../pages/admin/staff/Dashboard'))
     },
   },
   booking: {
@@ -113,6 +114,8 @@ export const adminComponentMap = {
     roles: {
       super: lazy(() => import('../pages/admin/super/Setting')),
       tenant: lazy(() => import('../pages/admin/tenant/Setting')),
+      location: lazy(() => import("../pages/admin/location/Settings")),
+      staff: lazy(() => import("../pages/admin/staff/Settings"))
     },
   },
   logout: {

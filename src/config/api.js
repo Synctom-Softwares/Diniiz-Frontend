@@ -80,9 +80,9 @@ class Api {
   }
 
   // PUT (e.g., update)
-  async put(endpoint, id, data = {}) {
+  async put(endpoint, id = "", data = {}) {
     try {
-      const res = await instance.put(`${this.endpoint}/${id}`, data);
+      const res = await instance.put(`${this.endpoint}${endpoint}/${id}`, data);
       return res.data;
     } catch (err) {
       this.handleError(err);
@@ -90,9 +90,9 @@ class Api {
   }
 
   // DELETE
-  async delete(endpoint, id) {
+  async delete(endpoint, id = "", data = {}) {
     try {
-      const res = await instance.delete(`${this.endpoint}${endpoint}/${id}`);
+      const res = await instance.delete(`${this.endpoint}${endpoint}/${id}`, data);
       return res.data;
     } catch (err) {
       this.handleError(err);

@@ -6,6 +6,7 @@ import Loader from '../common/Loader';
 const RoleBasedComponents = ({ route }) => {
   const {userData } = useSelector((state) => state.auth);
 // const role = "super"
+
   const roles = userData?.role?.split("-")[0]
 
   if (!userData || !roles) return <div className="p-4 text-red-500">Unauthorized</div>;

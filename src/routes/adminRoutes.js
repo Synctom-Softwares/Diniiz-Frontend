@@ -1,5 +1,5 @@
 import { adminComponentMap } from '../features/adminComponentMap';
-import RoleBasedComponent from '../components/routing/RoleBasedComponent';
+import RoleBasedComponent from '../components/routing/RoleBasedComponents';
 
 export const generateAdminRoutes = (role) => {
   const routes = [];

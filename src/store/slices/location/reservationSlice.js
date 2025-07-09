@@ -12,7 +12,6 @@ const initialState = {
   error: null,
 };
 
-
 export const getAllReservations = createAsyncThunk(
   "reservation/getAllReservations",
   async (params, { rejectWithValue }) => {
