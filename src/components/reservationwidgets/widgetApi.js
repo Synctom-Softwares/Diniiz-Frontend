@@ -14,7 +14,7 @@ export const getAvailableTables = async (locationId, body) => {
 }
 export const createReservation = async (locationId, payload) => {
   try {
-    const response = await locationApi.post(`/${locationId}/reservations/online`, payload);
+    const response = await locationApi.post(`/${locationId}/reservations`, payload);
     if(response) console.log('response', response)
       return response
   } catch (error) {
