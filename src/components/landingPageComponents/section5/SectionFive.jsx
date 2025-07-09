@@ -59,6 +59,7 @@ const SectionFive = () => {
     }
 
     // setSelectedPlan(planKey);
+    console.log('response')
     setError("");
 
     try {
@@ -99,19 +100,18 @@ const SectionFive = () => {
       const response = await paymentApi.post("/checkout",
         requestBody
       );
-
-      if (response.data.success) {
-        // Redirect to Stripe checkout
+      
+      if (response) {
         const result = await stripe.redirectToCheckout({
           sessionId: response.data.sessionId,
         });
-
+        
         if (result.error) {
           setError(result.error.message);
         }
       } else {
         setError(
-          response.data.message || "Payment initialization failed"
+          response.message || "Payment initialization failed"
         );
       }
     } catch (error) {
