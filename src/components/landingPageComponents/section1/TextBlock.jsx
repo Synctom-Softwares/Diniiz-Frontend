@@ -37,7 +37,7 @@ const TextBlock = () => {
             <MainButton
                 className="font-light text-[10px] md:text-[14px] px-6 py-1.5 lg:text-[16px]"
             >
-                See All Plans
+                <a href="#pricing">See All Plans</a>
             </MainButton>
         </motion.div>
     );

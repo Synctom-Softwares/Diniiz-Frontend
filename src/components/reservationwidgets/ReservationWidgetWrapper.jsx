@@ -4,7 +4,7 @@ import EnterDetails from "./EnterDetails";
 import SpecialRequest from "./SpecialRequest";
 import ConfirmReservation from "./ConfirmReservation";
 
-const ReservationWidgetWrapper = () => {
+const ReservationWidgetWrapper = ({ locationId }) => {
     const [step, setStep] = useState(1);
     const [reservationData, setReservationData] = useState({
         people: "",
@@ -28,10 +28,10 @@ const ReservationWidgetWrapper = () => {
     };
 
     const steps = {
-        1: <FindTable data={reservationData} update={updateData} onContinue={nextStep} />,
+        1: <FindTable data={reservationData} update={updateData} onContinue={nextStep} locationId={locationId}/>,
         2: <EnterDetails data={reservationData} update={updateData} onNext={nextStep} onPrevious={prevStep} />,
         3: <SpecialRequest data={reservationData} update={updateData} onConfirm={nextStep} onPrevious={prevStep} />,
-        4: <ConfirmReservation data={reservationData} onExit={() => setStep(1)} />,
+        4: <ConfirmReservation data={reservationData} onPrevious={prevStep} onExit={() => setStep(1)} locationId={locationId} />,
     };
 
 

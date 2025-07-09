@@ -18,9 +18,19 @@ const initialState = {
 
 export const getAllbookings = createAsyncThunk(
     "booking/getAllbookings",
-    async (id, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
+        const { tenantId, clientType, dateRange, source, locationId } = params;
+
+        // Build query parameters
+        const queryParams = new URLSearchParams();
+        if (clientType) queryParams.append('clientType', clientType);
+        if (dateRange) queryParams.append('dateRange', dateRange[0]);
+        if (dateRange) queryParams.append('dateRange', dateRange[1]);
+        if (source) queryParams.append('source', source);
+        if (locationId) queryParams.append('locationId', locationId);
+
         const { data, error } = await asyncHandler(() =>
-            tenantApi.get(`/${id}/reservations`)
+            tenantApi.get(`/${tenantId}/reservations?${queryParams.toString()}`)
         );
 
         if (error) return rejectWithValue(error);
@@ -29,14 +39,14 @@ export const getAllbookings = createAsyncThunk(
                 _id: r._id,
                 customerName: r.customer?.customerName,
                 locationId: r.locationId,
-                customerType: r.customer?.customerType,
+                customerType: r.customer?.customerType || "New",
                 date: new Date(r.date).toLocaleDateString(),
                 time: r.time,
                 table: r.tableId,
                 source: r.source,
                 action: null
             }))
-        }
+        };
     }
 );
 

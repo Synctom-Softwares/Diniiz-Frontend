@@ -22,6 +22,8 @@ import AdminLayout from './layouts/AdminLayout.jsx'
 import WidgetEntry from './components/reservationwidgets/WidgetEntry.jsx'
 
 import { Toaster } from './components/common/toast/Toaster.jsx'
+import SuccessPage from './pages/payment/SuccessPage.jsx'
+import FailurePage from './pages/payment/FailurePage.jsx'
 
 
 
@@ -68,6 +70,14 @@ const router = createBrowserRouter([
   {
     path: "/reservation-widget",
     element: <WidgetEntry />
+  },
+  {
+    path: "/payment/success",
+    element: <SuccessPage />
+  },
+  {
+    path: "/payment/fail",
+    element: <FailurePage />
   },
 
   {
@@ -131,6 +141,10 @@ const router = createBrowserRouter([
       {
         path: "setting",
         element: <RoleBasedComponents route="setting" />
+      },
+      {
+        path: "logout",
+        element: <RoleBasedComponents route="logout" />
       }
     ]
   },

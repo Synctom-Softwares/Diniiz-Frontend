@@ -19,7 +19,7 @@ export const getLocations = createAsyncThunk(
     );
 
     if (error) return rejectWithValue(error);
-    console.log('data', data)
+    // console.log('data', data)
     return data;
   }
 );

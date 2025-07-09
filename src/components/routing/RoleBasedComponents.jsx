@@ -1,26 +1,27 @@
 import { useSelector } from 'react-redux';
 import { adminComponentMap } from '../../features/adminComponentMap';
 import { Suspense } from 'react';
+import Loader from '../common/Loader';
 
 const RoleBasedComponents = ({ route }) => {
-  const {userData, role } = useSelector((state) => state.auth);
+  const {userData } = useSelector((state) => state.auth);
 // const role = "super"
-  const roles = role?.split("-")[0]
+  const roles = userData?.role?.split("-")[0]
 
-  if (!userData || !role) return <div className="p-4 text-red-500">Unauthorized</div>;
+  if (!userData || !roles) return <div className="p-4 text-red-500">Unauthorized</div>;
 
   const Component = adminComponentMap[route]?.roles?.[roles];
 
   if (!Component) {
     return (
       <div className="p-4 text-gray-600">
-        <strong>{route}</strong> not available for <strong>{role}</strong>
+        <strong>{route}</strong> not available for <strong>{roles}</strong>
       </div>
     );
   }
 
   return (
-    <Suspense fallback={<div className="p-4">Loading...</div>}>
+    <Suspense fallback={<Loader/>}>
       <Component />
     </Suspense>
   );

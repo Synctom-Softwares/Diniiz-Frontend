@@ -15,11 +15,22 @@ const initialState = {
 
 export const getAllReservations = createAsyncThunk(
   "reservation/getAllReservations",
-  async (locationId, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => {
+    const { locationId, clientType, dateRange, source, tableId, partySize } = params;
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (clientType) queryParams.append('clientType', clientType);
+    if (dateRange) queryParams.append('dateRange', dateRange[0]);
+    if (dateRange) queryParams.append('dateRange', dateRange[1]);
+    if (source) queryParams.append('source', source);
+    if (tableId) queryParams.append('tableId', tableId);
+    if (partySize) queryParams.append('partySize', partySize);
+
     const { data, error } = await asyncHandler(() =>
-      locationApi.get(`/${locationId}/reservations`)
+      locationApi.get(`/${locationId}/reservations?${queryParams.toString()}`)
     );
-    console.log('data', data)
+
     if (error) return rejectWithValue(error);
     return {
       reservations: data?.reservations?.map(r => ({
@@ -36,6 +47,43 @@ export const getAllReservations = createAsyncThunk(
     };
   }
 );
+
+export const getAllStaffReservations = createAsyncThunk(
+  "reservation/getAllStaffReservations",
+  async (params, { rejectWithValue }) => {
+    const { locationId, staffId, clientType, dateRange, source, tableId, partySize } = params;
+    
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (clientType) queryParams.append('clientType', clientType);
+    if (dateRange) queryParams.append('dateRange', dateRange[0]);
+    if (dateRange) queryParams.append('dateRange', dateRange[1]);
+    if (source) queryParams.append('source', source);
+    if (tableId) queryParams.append('tableId', tableId);
+    if (partySize) queryParams.append('partySize', partySize);
+
+
+    const { data, error } = await asyncHandler(() =>
+      locationApi.get(`/${locationId}/staff/${staffId}/tableReservations?${queryParams.toString()}`)
+    );
+
+    if (error) return rejectWithValue(error);
+    return {
+      reservations: data?.reservations?.map(r => ({
+        bookingId: r._id,
+        customerName: r.customer?.customerName,
+        partySize: r.partySize,
+        customerType: r.customer?.customerType,
+        date: new Date(r.date).toLocaleDateString(),
+        time: r.time,
+        table: r.tableId,
+        source: r.source,
+        action: null
+      }))
+    };
+  }
+);
+
 
 export const createReservation = createAsyncThunk(
   "reservation/createReservation",

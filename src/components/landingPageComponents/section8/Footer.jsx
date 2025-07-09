@@ -1,10 +1,10 @@
 import { Mail, Phone, User } from 'lucide-react';
 import MainButton from '../../common/buttons/MainButton'; 
-import Logo from '../../../assets/images/landing/logo.png'; 
+import Logo from '../../../assets/images/landing/textLogo.svg'; 
 
 const Footer = () => {
   return (
-    <footer className="w-full">
+    <footer id='contact' className="w-full">
 
       {/* Top Section */}
       <div className="bg-primary text-white px-6 py-10 rounded-2xl">
@@ -21,7 +21,7 @@ const Footer = () => {
           {/* Center - Heading */}
           <div className="text-center">
             <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl">
-              Streamline Your Restaurant Operations with <span className="">ReservO</span>
+              Streamline Your Restaurant Operations with <span className="">Diniiz</span>
             </h3>
           </div>
 
@@ -36,11 +36,11 @@ const Footer = () => {
 
           {/* Left - Contact Info */}
           <div className="flex md:flex-col gap-4 justify-center w-full md:w-1/3 lg:w-1/4">
-            <img src={Logo} alt="ReservO Logo" className="w-20 md:w-32" />
+            <img src={Logo} alt="Diniiz Logo" className="w-20 md:w-32" />
             <div className="flex flex-col md:items-start gap-2">
               <div className="flex items-center gap-2 text-gray-700">
                 <Mail size={14} className='text-primary'/>
-                <span className='text-xs'>support@reservo.com</span>
+                <span className='text-xs'>support@diniiz.com</span>
               </div>
               <div className="flex items-center gap-2 text-gray-700">
                 <Phone size={14} className='text-primary'/>

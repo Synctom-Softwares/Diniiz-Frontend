@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import Input from '../../common/Input';
@@ -46,13 +46,14 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
             value: table._id
         })) : [];
 
+    const fetchLocations = useCallback(async () => {
+        if (userData.tenantId) {
+            await dispatch(getLocations(userData.tenantId));
+        }
+    }, [dispatch, userData.tenantId])
+
     useEffect(() => {
         if (isTenantAdmin) {
-            const fetchLocations = async () => {
-                if (userData.tenantId) {
-                    await dispatch(getLocations(userData.tenantId));
-                }
-            }
             fetchLocations();
         } else {
             // For non-tenant admins, set the location from userData
@@ -65,14 +66,14 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
 
             }
         }
-    }, [dispatch, userData.tenantId, isTenantAdmin, userLocationId, locations]);
+    }, [dispatch, userData.tenantId, isTenantAdmin, fetchLocations, userLocationId]);
 
     useEffect(() => {
         const locationId = isTenantAdmin ? selectedLocation?.id : userLocationId;
 
         const fetchTables = async () => {
             if (locationId && formData.partySize && formData.date && formData.time) {
-                await dispatch(getTables({
+                const response = await dispatch(getTables({
                     locationId: locationId,
                     body: {
                         partySize: formData.partySize,
@@ -80,6 +81,8 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                         time: formData.time
                     }
                 }));
+
+                console.log('response', response)
             }
         }
         fetchTables();
