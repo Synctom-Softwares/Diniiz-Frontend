@@ -1,6 +1,6 @@
-import DashboardLayout from '@/components/common/DashboardLayout';
+import Layout from '@/components/common/Layout';
+import DemandTrendChart from '@/components/tenant/dashboard/DemandTrendChart';
 import ReservationsByLocationChart from '@/components/tenant/dashboard/ReservationsByLocationChart';
-import RevenueChart from '@/components/tenant/dashboard/RevenueChart';
 import StaffPerLocationChart from '@/components/tenant/dashboard/StaffPerLocationChart';
 import TenantMetrics from '@/components/tenant/dashboard/TenantMetrics';
 import Updates from '@/components/tenant/dashboard/Updates';
@@ -10,19 +10,18 @@ import React from 'react'
 function Dashboard() {
 
   return (
-    <DashboardLayout title={"Dashboard"}>
+    <Layout title={"Dashboard"}>
       <div className="grid grid-cols-12 xl:grid-cols-13 m-4 gap-4 *:rounded-3xl">
         <title>Dashboard</title>
 
         <div className="col-span-12 lg:col-span-4 xl:col-span-9 grid grid-cols-subgrid gap-2">
-          {/* TODO: Change metrics */}
           <TenantMetrics /> 
         </div>
         <div className="row-start-3 lg:row-start-2 xl:row-start-1 col-span-6 xl:col-span-4 xl:col-start-10 xl:row-span-3">
           <Updates updates={dummyUpdates} />
         </div>
-        <div className="flex items-center justify-center col-span-12 lg:col-span-8 xl:col-span-9 xl:row-span-2 min-h-52">
-          <RevenueChart />
+        <div className="flex items-center justify-center col-span-12 lg:col-span-8 xl:col-span-9 xl:row-span-2 min-h-52 bg-white border">
+          <DemandTrendChart />
         </div>
         <div className="flex items-center justify-center row-start-4 col-span-12 xl:col-span-9 bg-white p-4 border">
           <ReservationsByLocationChart data={BarsData} />
@@ -31,7 +30,7 @@ function Dashboard() {
           <StaffPerLocationChart />
         </div>
       </div>
-    </DashboardLayout>
+    </Layout>
   );
 }
 

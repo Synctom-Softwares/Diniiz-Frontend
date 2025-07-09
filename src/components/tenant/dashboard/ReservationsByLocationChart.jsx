@@ -58,7 +58,7 @@ const ReservationsByLocationChart = () => {
     <div className="w-full">
       <div className="pb-2 text-black/70 border-b-2">
         <h2 className="text-center font-semibold">Reservations by Location</h2>
-        <p className="font-semibold text-sm">No. of Reservations</p>
+        <p className="font-semibold text-left text-sm text-muted-foreground">No. of Reservations</p>
       </div>
 
       <ChartContainer config={chartConfig} className="h-[350px] w-full mx-auto">

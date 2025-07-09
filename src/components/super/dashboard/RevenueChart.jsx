@@ -31,7 +31,7 @@ const RevenueChart = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("/api/superadmin/revenue"); // adjust the endpoint as needed
+        const response = await axios.get("/api/superadmin/revenue");
         if (response.data.success) {
           const formattedData = response.data.revenueByMonth.map(item => ({
             displayDate: item.month,
@@ -48,7 +48,7 @@ const RevenueChart = () => {
   }, []);
 
   return (
-    <div className="w-full mx-auto p-4 bg-white rounded-xl border">
+    <div className="w-full mx-auto p-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold text-black/70 mb-1">

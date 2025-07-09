@@ -7,6 +7,7 @@ import {
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const LOCATION_COLORS = {
   Islamabad: "#2196F3",
@@ -79,10 +80,11 @@ const renderLabelWithLine = (props) => {
 const StaffPerLocationChart = () => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { userData: { tenantId }} = useSelector(state => state.auth)
 
   useEffect(() => {
     axios
-      .get("/api/tenants/AB002/staffDistribution")
+      .get(`/api/tenants/${tenantId}/staffDistribution`)
       .then((res) => {
         const distribution = res.data?.staffDistribution || {};
         const total = Object.values(distribution).reduce((a, b) => a + b, 0);
@@ -107,7 +109,6 @@ const StaffPerLocationChart = () => {
             percent: 0,
             fill: LOCATION_COLORS.Rawalpindi,
           },
-          { location: "Peshawar", percent: 0, fill: LOCATION_COLORS.Peshawar },
         ];
         setChartData(fallback);
       })
@@ -158,7 +159,7 @@ const StaffPerLocationChart = () => {
           </PieChart>
         </ResponsiveContainer>
       </ChartContainer>
-      <h2 className="align-self-end font-bold text-black/70">
+      <h2 className="align-self-end font-semibold text-black/70">
         Staff vs Location
       </h2>
     </div>

@@ -56,7 +56,7 @@ const TenantsTable = ({ columns = []}) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl px-6 py-2">
+    <div className="w-full px-6 py-2">
       <h2 className="text-xl font-semibold py-3 text-black/70">Top Tenants</h2>
       <Table>
         <TableHeader>

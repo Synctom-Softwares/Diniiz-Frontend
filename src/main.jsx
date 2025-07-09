@@ -22,6 +22,7 @@ import AdminLayout from './layouts/AdminLayout.jsx'
 import WidgetEntry from './components/reservationwidgets/WidgetEntry.jsx'
 
 import { Toaster } from './components/common/toast/Toaster.jsx'
+import { ToastContainer } from 'react-toastify'
 
 
 
@@ -145,6 +146,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         router={router}
       />
       <Toaster />
+      <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          style={{
+            zIndex: 9999
+          }}
+        />
     </Provider>
   </React.StrictMode>,
 )

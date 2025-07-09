@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import StatsCard from "@/components/common/StatsCard";
 import Api from "@/config/api";
+import { useSelector } from "react-redux";
 
 const TenantMetrics = () => {
     const [metricsData, setMetricsData] = useState({
@@ -17,12 +17,14 @@ const TenantMetrics = () => {
         }
     });
 
+    const { userData: { tenantId } } = useSelector(state => state.auth);
+    
     useEffect(() => {
         const fetchMetrics = async () => {
             try {
-                const tenantsApi = new Api("/api/tenants/AB002/dailyMetrics");
+                const tenantsApi = new Api(`/api/tenants/${tenantId}/dailyMetrics`);
                 const response = await tenantsApi.get("");
-                console.log("Tenant Data",response)
+                console.log("Tenant Data", response)
                 if (response?.success) {
                     setMetricsData(response.data);
                 }
@@ -31,7 +33,7 @@ const TenantMetrics = () => {
             }
         };
         fetchMetrics();
-    }, []);
+    }, [tenantId]);
 
     const stats = [
         {

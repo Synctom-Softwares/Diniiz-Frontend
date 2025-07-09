@@ -17,35 +17,47 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
-import axios from "axios";
+import { useSelector } from "react-redux";
+import locationApi from "@/config/locationApi";
 
 const ITEMS_PER_PAGE = 6;
 
 const ReservationsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [reservations, setReservations] = useState([]);
-  const totalPages = Math.ceil(reservations.length / ITEMS_PER_PAGE);
+  const [totalCount, setTotalCount] = useState(0);
+  const { userData: { locationId } } = useSelector(state => state.auth);
 
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await axios.get("/api/locations/AB002L1/reservations");
-        const formattedData = response.data.reservations.map((reservation) => ({
-          customerName: reservation.customer.customerName,
+        const response = await locationApi.get(`/${locationId}/reservations`);
+
+        let reservationList = [];
+        let count = 0;
+
+        reservationList = response.reservations;
+        count = response.count ?? response.reservations.length ?? 0;
+
+        const formattedData = reservationList.map((reservation) => ({
+          customerName: reservation.customer?.customerName || "",
           partySize: reservation.partySize,
-          date: new Date(reservation.date).toLocaleDateString(),
+          date: reservation.date ? new Date(reservation.date).toLocaleDateString() : "",
           time: reservation.time,
           tableId: reservation.tableId,
-          phone: reservation.customer.customerPhone,
+          phone: reservation.customer?.customerPhone || "",
         }));
         setReservations(formattedData);
+        setTotalCount(count);
       } catch (error) {
         console.error("Error fetching reservations:", error);
       }
     };
 
     fetchReservations();
-  }, []);
+  }, [locationId]);
+
+  const totalPages = Math.ceil((totalCount || reservations.length) / ITEMS_PER_PAGE);
 
   const currentData = reservations.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -92,8 +104,8 @@ const ReservationsTable = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl px-6 py-2">
-      <h2 className="text-xl font-semibold py-3 text-black/70">Reservations</h2>
+    <div className="w-full min-h-[250px] bg-white rounded-2xl">
+      <h2 className="text-xl font-semibold pb-3 text-black/70">Reservations</h2>
       <Table>
         <TableHeader>
           <TableRow>
@@ -114,7 +126,7 @@ const ReservationsTable = () => {
             </TableRow>
           ) : (
             currentData.map((reservation, index) => (
-              <TableRow key={index} className="border-0">
+              <TableRow key={index} className="border-0 text-left">
                 <TableCell>{reservation.customerName}</TableCell>
                 <TableCell>{reservation.partySize}</TableCell>
                 <TableCell>{reservation.date}</TableCell>
@@ -127,14 +139,14 @@ const ReservationsTable = () => {
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-between gap-4 py-4 pt-8 border-t">
+      <div className="flex items-center justify-between gap-4 py-4 pt-8">
         <Pagination className="justify-center sm:justify-end">
           <PaginationContent className="gap-1">
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                label=""
+                
                 className="bg-muted hover:bg-gray-200 cursor-pointer"
               />
             </PaginationItem>
@@ -161,7 +173,6 @@ const ReservationsTable = () => {
               <PaginationNext
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                label=""
                 className="bg-muted hover:bg-gray-200 cursor-pointer"
               />
             </PaginationItem>

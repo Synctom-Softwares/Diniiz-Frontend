@@ -36,7 +36,7 @@ const GenericTable = ({ columns = [], data = [], actions = [], handleDropdownCha
 
     return (
         <div className="overflow-x-auto min-h-80">
-            <table className="min-w-full  bg-white lg:text-[15px] text-[13px] text-left">
+            <table className="min-w-full bg-white lg:text-[15px] text-[13px] text-left">
                 <thead className=" text-textPrimary">
                     <tr>
                         {columns.map((col) => (
