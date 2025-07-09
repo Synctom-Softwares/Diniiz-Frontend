@@ -7,7 +7,7 @@ import store from './store/store/store.js'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
 import Login from '../src/pages/auth/Login.jsx'
-import SignUp from '../src/pages/Auth/SignUp.jsx'
+import SignUp from '../src/pages/auth/SignUp.jsx'
 import NotFound from '../src/pages/404/NotFound.jsx'
 import LandingPage from '../src/pages/landing/LandingPage.jsx'
 
