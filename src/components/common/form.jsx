@@ -1,7 +1,8 @@
 import Select from "./Select";
 import Input from "./Input";
 import AuthButton from "./buttons/AuthButton";
-import { useEffect } from "react";
+import { useEffect, useState} from "react";
+import { Eye, EyeClosed } from "lucide-react";
 
 function CommonForm({
   formControls,
@@ -15,6 +16,8 @@ function CommonForm({
   loading
 }) {
 
+  const [showPassword, setShowPassword] = useState(false);
+
   function renderInputsByComponentType(getControlItem) {
     let element = null;
     const value = formData[getControlItem.name] || "";
@@ -24,19 +27,29 @@ function CommonForm({
         element = (
           <>
             {getControlItem?.label &&
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-textSecondary">
                 <label className="text-left  font-inter">{getControlItem.label}</label>
                 {getControlItem?.type == "password" && (
-                  <div>
-                    <p className=""><span>&#128065;</span> Hide</p>
-                  </div>)
+                   <button
+                    type="button"
+                    className="text-sm flex gap-1 items-center text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <span>{showPassword ? <EyeClosed /> : <Eye/>}</span> <span>{showPassword ? "Hide" : "Show"}</span>
+                  </button>
+                  // <div>
+                  //   <p className=""><span>&#128065;</span> Hide</p>
+                  // </div>
+                  )
                 }
               </div>}
             <Input
               name={getControlItem.name}
               placeholder={getControlItem.placeholder}
               id={getControlItem.name}
-              type={getControlItem.type}
+              type={getControlItem.type === "password" ? 
+                    (showPassword ? "text" : "password") : 
+                    getControlItem.type}
               value={value}
               onChange={(event) =>
                 setFormData({

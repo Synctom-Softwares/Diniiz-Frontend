@@ -39,10 +39,10 @@ const Booking = () => {
 
     const fetchBookings = useCallback(async (filters = {}) => {
         if (!userData?.locationId) return;
-        
+
         setLocalLoading(true);
         setLocalError(null);
-        
+
         try {
             const params = {
                 ...filters,
@@ -52,10 +52,11 @@ const Booking = () => {
             if (isLocationAdmin) {
                 await dispatch(getAllReservations(params));
             } else {
-                await dispatch(getAllStaffReservations({ 
-                    ...params,
-                    staffId 
-                }));
+                await dispatch(getAllReservations(params));
+                // await dispatch(getAllStaffReservations({ 
+                //     ...params,
+                //     staffId 
+                // }));
             }
         } catch (err) {
             console.error('Failed to fetch bookings:', err);
@@ -67,7 +68,7 @@ const Booking = () => {
 
     const handleFilter = useCallback(() => {
         const filters = {};
-        
+
         if (clientType) filters.clientType = clientType;
         if (dateRange && dateRange[0] && dateRange[1]) {
             filters.dateRange = [new Date(dateRange[0]).toISOString(), new Date(dateRange[1]).toISOString()]
@@ -138,7 +139,7 @@ const Booking = () => {
                 ) : hasError ? (
                     <div className="flex flex-col items-center justify-center h-64">
                         <p className="text-red-500 mb-4">{hasError}</p>
-                        <Button 
+                        <Button
                             onClick={() => fetchBookings()}
                             className="px-4 py-2"
                         >
@@ -158,7 +159,7 @@ const Booking = () => {
                                 </Button>
                             </div>
                         </div>
-                        
+
                         <div className="flex flex-col md:items-center md:flex-row gap-4 w-full md:w-7/8 text-sm">
                             <DropdownSelect
                                 label="Client Type"
@@ -170,7 +171,7 @@ const Booking = () => {
                                 selected={clientType}
                                 onChange={(opt) => setClientType(opt.value)}
                             />
-                            
+
                             <div className="flex items-center gap-2">
                                 <label className="text-sm text-textPrimary mb-1">Date Range</label>
                                 <DateRangePicker
@@ -180,7 +181,7 @@ const Booking = () => {
                                     clearIcon={null}
                                 />
                             </div>
-                            
+
                             <DropdownSelect
                                 label="Source"
                                 options={["Walk-in", "Reserved"].map((type) => ({
@@ -191,7 +192,7 @@ const Booking = () => {
                                 selected={source}
                                 onChange={(opt) => setSource(opt.value)}
                             />
-                            
+
                             <DropdownSelect
                                 label="Table"
                                 options={allTables?.map((table) => ({
@@ -202,7 +203,7 @@ const Booking = () => {
                                 selected={tableId}
                                 onChange={(opt) => setTableId(opt.value)}
                             />
-                            
+
                             <DropdownSelect
                                 label="Party Size"
                                 options={["1", "2", "3", "4", "5", "6", "7", "8"].map((size) => ({
@@ -213,7 +214,7 @@ const Booking = () => {
                                 selected={partySize}
                                 onChange={(opt) => setPartySize(opt.value)}
                             />
-                            
+
                             <Button
                                 radius="rounded-xl"
                                 className="px-5 py-1 shadow-none"
@@ -221,7 +222,7 @@ const Booking = () => {
                             >
                                 Filter
                             </Button>
-                            
+
                             {hasFilters && (
                                 <Button
                                     radius="rounded-xl"
@@ -233,41 +234,41 @@ const Booking = () => {
                             )}
                         </div>
 
-                        <AddBookingForm 
-                            isOpen={showAddForm} 
-                            onClose={() => setShowAddForm(false)} 
+                        <AddBookingForm
+                            isOpen={showAddForm}
+                            onClose={() => setShowAddForm(false)}
                             label="Add Booking"
                             fetchBookings={() => fetchBookings()}
                             isTenantAdmin={false}
                         />
-                        
-                        <AddBookingForm 
-                            isOpen={showEditForm} 
-                            onClose={() => setShowEditForm(false)} 
+
+                        <AddBookingForm
+                            isOpen={showEditForm}
+                            onClose={() => setShowEditForm(false)}
                             label="Edit Booking"
                             initialData={editingRowData}
                             fetchBookings={() => fetchBookings()}
                             isTenantAdmin={false}
                         />
-                        
-                        <ConfirmationModal 
-                            isOpen={showCancelForm} 
-                            onClose={() => setShowCancelForm(false)} 
-                            label="Cancel Booking" 
-                            message="Are you sure to cancel the reservation!" 
+
+                        <ConfirmationModal
+                            isOpen={showCancelForm}
+                            onClose={() => setShowCancelForm(false)}
+                            label="Cancel Booking"
+                            message="Are you sure to cancel the reservation!"
                         />
-                        
-                        <ConfirmationModal 
-                            isOpen={showMarkAsCompleted} 
-                            onClose={() => setShowMarkAsCompleted(false)} 
-                            label="Mark as Completed" 
-                            message="Are you sure to Mark the reservation as Completed!" 
+
+                        <ConfirmationModal
+                            isOpen={showMarkAsCompleted}
+                            onClose={() => setShowMarkAsCompleted(false)}
+                            label="Mark as Completed"
+                            message="Are you sure to Mark the reservation as Completed!"
                         />
 
                         <div className="flex justify-start pt-4">
                             <label className="text-lg font-semibold">All Customers</label>
                         </div>
-                        
+
                         <GenericTable
                             columns={locationBookingHeadings}
                             data={allReservations || []}

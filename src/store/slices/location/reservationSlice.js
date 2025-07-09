@@ -31,6 +31,8 @@ export const getAllReservations = createAsyncThunk(
       locationApi.get(`/${locationId}/reservations?${queryParams.toString()}`)
     );
 
+    console.log("reservations", data.reservations)
+
     if (error) return rejectWithValue(error);
     return {
       reservations: data?.reservations?.map(r => ({

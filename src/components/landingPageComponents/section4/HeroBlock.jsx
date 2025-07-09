@@ -32,10 +32,10 @@ const HeroBlock = () => {
         font-semibold
         text-textPrimary
         pt-11
-        sm:pt-32
-        md:pt-40
-        lg:pt-52
-        xl:pt-64
+        sm:pt-20
+        md:pt-32 
+        lg:pt-40
+        xl:pt-50
         text-center
         px-4                
       ">

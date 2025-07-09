@@ -13,6 +13,7 @@
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-toast": "^1.2.14",
     "@reduxjs/toolkit": "^2.8.1",
+    "@stripe/stripe-js": "^7.4.0",
     "@tailwindcss/vite": "^4.1.6",
     "@wojtekmaj/react-daterange-picker": "^6.0.0",
     "axios": "^1.10.0",

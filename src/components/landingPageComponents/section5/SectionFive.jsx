@@ -14,6 +14,7 @@ import axios from 'axios';
 import ConfirmationModal from '../../common/ConfirmationModal';
 import DropdownSelect from '../../common/DropdownSelect';
 import Api from '../../../config/api';
+import { loadStripe } from '@stripe/stripe-js';
 
 const SectionFive = () => {
   const [billing, setBilling] = useState('monthly');
@@ -24,7 +25,7 @@ const SectionFive = () => {
   const [subscriptionType, setSubscriptionType] = useState('monthly');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const SectionFive = () => {
       setShowLoginModal(true);
       return;
     }
-    
+
     setSelectedPlan(plan);
     setShowPaymentModal(true);
   };
@@ -51,35 +52,141 @@ const SectionFive = () => {
   };
 
   const handlePaymentConfirm = async () => {
-    if (!selectedPlan || !userData?._id) {
-      console.log('selectedPlan', selectedPlan)
-      console.log('userData', userData)
-      return
-    };
-    
-    setIsProcessing(true);
-    setError(null);
+    // Redirect to login if not authenticated
+    if (!status) {
+      navigate("/auth/login", { state: { from: window.location.pathname } });
+      return;
+    }
+
+    // setSelectedPlan(planKey);
+    setError("");
 
     try {
-      const paymentApi = new Api('/api/payment')
-      const response = await paymentApi.post('/checkout', {
+      // Initialize Stripe
+      const stripe = await loadStripe(
+        "pk_test_51RglbC08uh9iC2XpRQIfHgG3MrvTHRTz9Iwt6MJWzKwcDyRF1tj2grewT386bPaowFUk0yUkRezPR61WBBO6pgch00ZaHxLcFz"
+      );
+
+      const plan = selectedPlan?.planName;
+      console.log('plan', plan)
+      if (!plan) {
+        throw new Error("Selected plan is not available");
+      }
+
+      // Validate plan data matches backend requirements
+      // if (!plan.name || !plan.bestFor) {
+      //   throw new Error("Invalid plan structure: missing name or description");
+      // }
+
+      // Convert prices to numbers as backend expects
+      const monthlyPrice = Number(selectedPlan.pricePerMonth);
+      const yearlyPrice = Number(selectedPlan.pricePerYear);
+
+      console.log('monthlyPrice', monthlyPrice)
+      if (isNaN(monthlyPrice) || isNaN(yearlyPrice)) {
+        throw new Error("Invalid price values");
+      }
+
+      // Prepare request body matching backend schema
+      const requestBody = {
         planId: selectedPlan._id,
         userId: userData._id,
-        subscriptionType: subscriptionType
-      });
+        subscriptionType: subscriptionType, // 'monthly' or 'yearly'
+      };
 
-      if (response.data?.url) {
-        window.location.href = response.data.url; // Redirect to Stripe
+      // Call backend endpoint
+      const paymentApi = new Api('/api/payment')
+      const response = await paymentApi.post("/checkout",
+        requestBody
+      );
+
+      if (response.data.success) {
+        // Redirect to Stripe checkout
+        const result = await stripe.redirectToCheckout({
+          sessionId: response.data.sessionId,
+        });
+
+        if (result.error) {
+          setError(result.error.message);
+        }
       } else {
-        setError('Failed to initiate payment. Please try again.');
+        setError(
+          response.data.message || "Payment initialization failed"
+        );
       }
-    } catch (err) {
-      console.error('Payment error:', err);
-      setError(err.response?.data?.message || 'Payment processing failed');
-    } finally {
-      setIsProcessing(false);
+    } catch (error) {
+      console.error("Payment error:", error);
+      setError(error.message || "Payment processing failed");
     }
   };
+  // const handlePaymentConfirm = async () => {
+  //   if (!selectedPlan || !userData?._id) {
+  //     console.log('selectedPlan', selectedPlan)
+  //     console.log('userData', userData)
+  //     return
+  //   };
+
+  //   setIsProcessing(true);
+  //   setError(null);
+
+  //   // Payment function that matches backend requirements
+
+  //   try {
+
+  //     const stripe = await loadStripe(
+  //       "pk_test_51RglbC08uh9iC2XpRQIfHgG3MrvTHRTz9Iwt6MJWzKwcDyRF1tj2grewT386bPaowFUk0yUkRezPR61WBBO6pgch00ZaHxLcFz"
+  //     );
+
+  //     // console.log('selectedPlan', selectedPlan)
+  //     console.log('plans', plans)
+
+  //     // const plan = plans[planKey];
+  //     if (!selectedPlan) {
+  //       throw new Error("Selected plan is not available");
+  //     }
+
+
+  //     // Convert prices to numbers as backend expects
+  //     const monthlyPrice = Number(selectedPlan.monthlyPrice);
+  //     const yearlyPrice = Number(selectedPlan.yearlyPrice);
+
+  //     // if (isNaN(monthlyPrice) || isNaN(yearlyPrice)) {
+  //     //   throw new Error("Invalid price values");
+  //     // }
+
+  //     const paymentApi = new Api('/api/payment')
+
+  //     console.log(selectedPlan?._id, userData?._id)
+    
+  //     const response = await paymentApi.post('/checkout', {
+  //       planId: selectedPlan?._id,
+  //       userId: userData?._id,
+  //       subscriptionType: subscriptionType
+  //     });
+
+  //     console.log('response', response)
+
+  //     if (response.data.success) {
+  //         // Redirect to Stripe checkout
+  //         const result = await stripe.redirectToCheckout({
+  //           sessionId: response.data.sessionId,
+  //         });
+
+  //         if (result.error) {
+  //           setError(result.error.message);
+  //         }
+  //       } else {
+  //         setError(
+  //           response.data.message || "Payment initialization failed"
+  //         );
+  //       }
+  //   } catch (err) {
+  //     console.error('Payment error:', err);
+  //     setError(err.response?.data?.message || 'Payment processing failed');
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
 
   return (
     <section id='pricing' className="-pt-10 md:py-10 px-2 lg:px-16 bg-white">
@@ -116,7 +223,7 @@ const SectionFive = () => {
         confirmText="Login"
         cancelText="Cancel"
       />
-      
+
 
       {/* Payment Confirmation Modal */}
       <ConfirmationModal
@@ -137,8 +244,8 @@ const SectionFive = () => {
             <div className="flex justify-between">
               <span className="font-medium">Price:</span>
               <span>
-                ${subscriptionType === 'monthly' 
-                  ? selectedPlan.pricePerMonth 
+                ${subscriptionType === 'monthly'
+                  ? selectedPlan.pricePerMonth
                   : selectedPlan.pricePerYear}
                 /{subscriptionType === 'monthly' ? 'month' : 'year'}
               </span>
@@ -182,9 +289,9 @@ const SectionFive = () => {
         >
           {plans?.map((plan, index) => (
             <SwiperSlide key={plan.id}>
-              <PlanCard 
-                plan={plan} 
-                billing={billing} 
+              <PlanCard
+                plan={plan}
+                billing={billing}
                 index={index}
                 onChoosePlan={() => handleChoosePlan(plan)}
               />
@@ -196,10 +303,10 @@ const SectionFive = () => {
       {/* Tablet: Column layout */}
       <div className="hidden md:flex lg:hidden flex-col gap-6">
         {plans?.map((plan, index) => (
-          <PlanCard 
-            key={plan.id} 
-            plan={plan} 
-            billing={billing} 
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            billing={billing}
             index={index}
             onChoosePlan={() => handleChoosePlan(plan)}
           />
@@ -209,10 +316,10 @@ const SectionFive = () => {
       {/* Laptop & Desktop: 3 Column Grid */}
       <div className="hidden lg:grid lg:grid-cols-3 gap-6">
         {plans?.map((plan, index) => (
-          <PlanCard 
-            key={plan.id} 
-            plan={plan} 
-            billing={billing} 
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            billing={billing}
             index={index}
             onChoosePlan={() => handleChoosePlan(plan)}
           />
