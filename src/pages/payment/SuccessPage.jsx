@@ -75,169 +75,169 @@ const SuccessPage = () => {
   };
 
   // Fetch payment session data
-//   useEffect(() => {
-//     const fetchSessionData = async () => {
-//       setError(null);
-//       const query = new URLSearchParams(window.location.search);
-//       const sessionId = query.get("session_id");
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      setError(null);
+      const query = new URLSearchParams(window.location.search);
+      const sessionId = query.get("session_id");
 
-//       if (!sessionId) {
-//         setError("No session ID found in URL");
-//         setPaymentStatus("failed");
-//         return;
-//       }
+      if (!sessionId) {
+        setError("No session ID found in URL");
+        setPaymentStatus("failed");
+        return;
+      }
 
-//       try {
-//         const response = await axios.get(
-//           http://localhost:5000/api/payment/session/${sessionId}
-//         );
-//         const { data } = response;
 
-//         if (data.success && data.payment_status === "paid") {
-//           setPaymentStatus("success");
-//           setSessionData(data);
+      try {
+        const paymentApi = new Api('/api/payment')
+        const response = await paymentApi.get(`/session/${sessionId}`);
+        const { data } = response;
 
-//           // Set order details from API response
-//           setOrderDetails({
-//             orderId: data.metadata?.userId || "N/A",
-//             planName: data.metadata?.planName || "N/A",
-//             planId: data.metadata?.planId || "n/a",
-//             price: data.amount_total
-//               ? $${(data.amount_total / 100).toFixed(2)}
-//               : "N/A",
-//             paymentMethod: data.payment_method || "Credit Card",
-//             date: new Date().toLocaleDateString("en-US", {
-//               year: "numeric",
-//               month: "long",
-//               day: "numeric",
-//             }),
-//             duration:
-//               data.metadata?.subscriptionType === "monthly"
-//                 ? "1 Month"
-//                 : "1 Year",
-//             nextBillingDate: new Date(
-//               data.metadata?.subscriptionType === "monthly"
-//                 ? new Date().setMonth(new Date().getMonth() + 1)
-//                 : new Date().setFullYear(new Date().getFullYear() + 1)
-//             ).toLocaleDateString("en-US", {
-//               year: "numeric",
-//               month: "long",
-//               day: "numeric",
-//             }),
-//             features: getPlanFeatures(data.metadata?.planName),
-//           });
+        if (data.success && data.payment_status === "paid") {
+          setPaymentStatus("success");
+          setSessionData(data);
 
-//           // Pre-fill form with customer data
-//           setFormData((prev) => ({
-//             ...prev,
-//             email: data.customer_email || "",
-//             tenantName: data.metadata?.userId
-//               ? Tenant ${data.metadata.userId}
-//               : "",
-//             subscriptionType: data.metadata?.subscriptionType || "",
-//             plan: data.metadata?.planName || "",
-//           }));
-//         } else {
-//           setPaymentStatus("failed");
-//           setError(data.message || "Payment verification failed");
-//         }
-//       } catch (err) {
-//         console.error("Error fetching session data:", err);
-//         setPaymentStatus("failed");
-//         setError(
-//           err.response?.data?.message ||
-//             "Failed to verify payment. Please contact support."
-//         );
-//       }
-//     };
+          // Set order details from API response
+          setOrderDetails({
+            orderId: data.metadata?.userId || "N/A",
+            planName: data.metadata?.planName || "N/A",
+            planId: data.metadata?.planId || "n/a",
+            price: data.amount_total
+              ? `$${(data.amount_total / 100).toFixed(2)}`
+              : "N/A",
+            paymentMethod: data.payment_method || "Credit Card",
+            date: new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            duration:
+              data.metadata?.subscriptionType === "monthly"
+                ? "1 Month"
+                : "1 Year",
+            nextBillingDate: new Date(
+              data.metadata?.subscriptionType === "monthly"
+                ? new Date().setMonth(new Date().getMonth() + 1)
+                : new Date().setFullYear(new Date().getFullYear() + 1)
+            ).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            features: getPlanFeatures(data.metadata?.planName),
+          });
 
-//     fetchSessionData();
-//   }, []);
+          // Pre-fill form with customer data
+          setFormData((prev) => ({
+            ...prev,
+            email: data.customer_email || "",
+            tenantName: data.metadata?.userId
+              ? `Tenant ${data.metadata.userId}`
+              : "",
+            subscriptionType: data.metadata?.subscriptionType || "",
+            plan: data.metadata?.planName || "",
+          }));
+        } else {
+          setPaymentStatus("failed");
+          setError(data.message || "Payment verification failed");
+        }
+      } catch (err) {
+        console.error("Error fetching session data:", err);
+        setPaymentStatus("failed");
+        setError(
+          err.response?.data?.message ||
+            "Failed to verify payment. Please contact support."
+        );
+      }
+    };
+
+    fetchSessionData();
+  }, []);
 
   // Helper function to determine plan features
-//   const getPlanFeatures = (planName) => {
-//     switch (planName) {
-//       case "beginner":
-//         return [
-//           "Up to 10 properties",
-//           "Up to 50 tenants",
-//           "Basic reporting",
-//           "Email support",
-//         ];
-//       case "professional":
-//         return [
-//           "Up to 50 properties",
-//           "Up to 200 tenants",
-//           "Advanced reporting",
-//           "Priority support",
-//         ];
-//       case "enterprise":
-//         return [
-//           "Unlimited properties",
-//           "Unlimited tenants",
-//           "Advanced analytics",
-//           "24/7 dedicated support",
-//           "Custom branding",
-//         ];
-//       default:
-//         return ["Basic features", "Email support"];
-//     }
-//   };
+  const getPlanFeatures = (planName) => {
+    switch (planName) {
+      case "beginner":
+        return [
+          "Up to 10 properties",
+          "Up to 50 tenants",
+          "Basic reporting",
+          "Email support",
+        ];
+      case "professional":
+        return [
+          "Up to 50 properties",
+          "Up to 200 tenants",
+          "Advanced reporting",
+          "Priority support",
+        ];
+      case "enterprise":
+        return [
+          "Unlimited properties",
+          "Unlimited tenants",
+          "Advanced analytics",
+          "24/7 dedicated support",
+          "Custom branding",
+        ];
+      default:
+        return ["Basic features", "Email support"];
+    }
+  };
 
   // Render loading state
-//   if (paymentStatus === "pending") {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-//         <div className="max-w-md mx-auto text-center">
-//           <div className="animate-pulse flex justify-center mb-6">
-//             <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-//               <div className="h-8 w-8 bg-blue-400 rounded-full"></div>
-//             </div>
-//           </div>
-//           <h1 className="text-3xl font-bold text-gray-900 mb-3">
-//             Verifying Payment...
-//           </h1>
-//           <p className="text-lg text-gray-600">
-//             Please wait while we verify your payment details.
-//           </p>
-//         </div>
-//       </div>
-//     );
-//   }
+  if (paymentStatus === "pending") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto text-center">
+          <div className="animate-pulse flex justify-center mb-6">
+            <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
+              <div className="h-8 w-8 bg-blue-400 rounded-full"></div>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+            Verifying Payment...
+          </h1>
+          <p className="text-lg text-gray-600">
+            Please wait while we verify your payment details.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
 //   // Render failed payment state
-//   if (paymentStatus === "failed") {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-//         <div className="max-w-md mx-auto">
-//           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-//             <div className="bg-red-50 px-8 py-12 text-center">
-//               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-//                 <XCircleIcon className="h-10 w-10 text-red-600" />
-//               </div>
-//               <h1 className="text-3xl font-bold text-gray-900 mb-3">
-//                 Payment Failed
-//               </h1>
-//               <p className="text-lg text-gray-600 mb-6">
-//                 We couldn't verify your payment. Please try again.
-//               </p>
-//               {error && (
-//                 <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-//                   {error}
-//                 </div>
-//               )}
-//               <button
-//                 onClick={() => navigate("/pricing")}
-//                 className="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
-//               >
-//                 Return to Pricing
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
+  if (paymentStatus === "failed") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-red-50 px-8 py-12 text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <XCircleIcon className="h-10 w-10 text-red-600" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Payment Failed
+              </h1>
+              <p className="text-lg text-gray-600 mb-6">
+                We couldn't verify your payment. Please try again.
+              </p>
+              {error && (
+                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+                  {error}
+                </div>
+              )}
+              <button
+                onClick={() => navigate("/pricing")}
+                className="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              >
+                Return to Pricing
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render success state
   return (

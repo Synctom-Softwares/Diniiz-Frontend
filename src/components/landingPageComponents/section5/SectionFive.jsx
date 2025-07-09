@@ -59,9 +59,8 @@ const SectionFive = () => {
     }
 
     // setSelectedPlan(planKey);
-    console.log('response')
     setError("");
-
+    
     try {
       // Initialize Stripe
       const stripe = await loadStripe(
@@ -73,37 +72,38 @@ const SectionFive = () => {
       if (!plan) {
         throw new Error("Selected plan is not available");
       }
-
+      
       // Validate plan data matches backend requirements
       // if (!plan.name || !plan.bestFor) {
-      //   throw new Error("Invalid plan structure: missing name or description");
-      // }
-
-      // Convert prices to numbers as backend expects
-      const monthlyPrice = Number(selectedPlan.pricePerMonth);
-      const yearlyPrice = Number(selectedPlan.pricePerYear);
+        //   throw new Error("Invalid plan structure: missing name or description");
+        // }
+        
+        // Convert prices to numbers as backend expects
+        const monthlyPrice = Number(selectedPlan.pricePerMonth);
+        const yearlyPrice = Number(selectedPlan.pricePerYear);
 
       console.log('monthlyPrice', monthlyPrice)
       if (isNaN(monthlyPrice) || isNaN(yearlyPrice)) {
         throw new Error("Invalid price values");
       }
-
+      
       // Prepare request body matching backend schema
       const requestBody = {
         planId: selectedPlan._id,
         userId: userData._id,
         subscriptionType: subscriptionType, // 'monthly' or 'yearly'
       };
-
+      
       // Call backend endpoint
       const paymentApi = new Api('/api/payment')
       const response = await paymentApi.post("/checkout",
         requestBody
       );
+      console.log('response', response)
       
       if (response) {
         const result = await stripe.redirectToCheckout({
-          sessionId: response.data.sessionId,
+          sessionId: response.sessionId,
         });
         
         if (result.error) {
