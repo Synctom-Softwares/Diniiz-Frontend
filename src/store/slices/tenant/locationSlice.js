@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Api from "../../../config/api";
 import tenantApi from "../../../config/tenantApi";
+import locationApi from "../../../config/locationApi";
 import asyncHandler from "../../../utils/asyncHandler";
 
 
@@ -15,7 +16,7 @@ export const getLocations = createAsyncThunk(
   "location/getLocations",
   async (id, { rejectWithValue }) => {
     const { data, error } = await asyncHandler(() =>
-      tenantApi.get(`/${id}/locations`) 
+      locationApi.get(`/all/tenants/${id}`) 
     );
 
     if (error) return rejectWithValue(error);

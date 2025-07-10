@@ -106,7 +106,7 @@ const Booking = () => {
         getAllLocations()
     }, [getAllLocations])
 
-    const isLoading = loading || localLoading;
+    const isLoading = localLoading;
     const hasError = error || localError;
     const hasFilters = clientType || (dateRange[0] && dateRange[1]) || source || table || location;
 
