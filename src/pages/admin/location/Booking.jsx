@@ -12,6 +12,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllReservations, getAllStaffReservations } from "../../../store/slices/location/reservationSlice";
 import Loader from "../../../components/common/Loader";
 import locationApi from "../../../config/locationApi";
+import { motion } from "framer-motion";
+import { X } from "lucide-react";
+import Input from "../../../components/common/Input"
+import MainButton from "../../../components/common/buttons/MainButton";
+import Api from "../../../config/api";
+import { useToast } from "@/components/common/toast/useToast";
 
 const Booking = () => {
     const dispatch = useDispatch();
@@ -20,6 +26,7 @@ const Booking = () => {
     const isLocationAdmin = userData?.role === "location-admin";
     const staffId = !isLocationAdmin ? userData?._id : null;
     const locationId = userData?.locationId;
+    const tenantId = userData?.tenantId;
 
     const [clientType, setClientType] = useState("");
     const [dateRange, setDateRange] = useState([null, null]);
@@ -36,6 +43,11 @@ const Booking = () => {
     const [showCancelForm, setShowCancelForm] = useState(false);
     const [noShowForm, setNoShowForm] = useState(false);
     const [showMarkAsCompleted, setShowMarkAsCompleted] = useState(false);
+    const [showAddTableForm, setShowAddTableForm] = useState(false);
+    const [allBookingLocal, setAllBookingLocal] = useState([]);
+
+
+    const { toast } = useToast()
 
     const fetchBookings = useCallback(async (filters = {}) => {
         if (!userData?.locationId) return;
@@ -49,15 +61,21 @@ const Booking = () => {
                 locationId
             };
 
+            let response;
             if (isLocationAdmin) {
-                await dispatch(getAllReservations(params));
+                response = await dispatch(getAllReservations(params));
             } else {
-                await dispatch(getAllReservations(params));
+                response = await dispatch(getAllReservations(params));
                 // await dispatch(getAllStaffReservations({ 
                 //     ...params,
                 //     staffId 
                 // }));
             }
+            console.log('response', response)
+            if (response.success) {
+                setAllBookingLocal(response.reservations)
+            }
+
         } catch (err) {
             console.error('Failed to fetch bookings:', err);
             setLocalError('Failed to load bookings. Please try again.');
@@ -109,7 +127,7 @@ const Booking = () => {
     useEffect(() => {
         const fetchAllTables = async () => {
             try {
-                const response = await locationApi.post(`/${locationId}/tables`);
+                const response = await locationApi.get(`/${locationId}/tables`);
                 if (response) {
                     setAllTables(response.tables);
                 }
@@ -126,6 +144,7 @@ const Booking = () => {
     const isLoading = loading || localLoading;
     const hasError = error || localError;
     const hasFilters = clientType || (dateRange[0] && dateRange[1]) || source || tableId || partySize;
+
 
     return (
         <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff]">
@@ -148,15 +167,29 @@ const Booking = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="flex flex-col justify-between my-4">
-                            <div className="flex gap-3 text-sm">
-                                <Button
-                                    radius="rounded-xl"
-                                    className="px-2 py-1 shadow-none text-sm"
-                                    onClick={() => setShowAddForm(true)}
-                                >
-                                    Add Booking +
-                                </Button>
+                        <div className="flex gap-4">
+                            <div className="flex flex-col justify-between my-4">
+                                <div className="flex gap-3 text-sm">
+                                    <Button
+                                        radius="rounded-xl"
+                                        className="px-2 py-1 shadow-none text-sm"
+                                        onClick={() => setShowAddForm(true)}
+                                    >
+                                        Add Booking +
+                                    </Button>
+                                </div>
+                            </div>
+                            {/* //TODO: remove after testing */}
+                            <div className="flex flex-col justify-between my-4">
+                                <div className="flex gap-3 text-sm">
+                                    <Button
+                                        radius="rounded-xl"
+                                        className="px-2 py-1 shadow-none text-sm"
+                                        onClick={() => setShowAddTableForm(true)}
+                                    >
+                                        Add Table +
+                                    </Button>
+                                </div>
                             </div>
                         </div>
 
@@ -234,6 +267,8 @@ const Booking = () => {
                             )}
                         </div>
 
+
+
                         <AddBookingForm
                             isOpen={showAddForm}
                             onClose={() => setShowAddForm(false)}
@@ -246,7 +281,7 @@ const Booking = () => {
                             isOpen={showEditForm}
                             onClose={() => setShowEditForm(false)}
                             label="Edit Booking"
-                            initialData={editingRowData}
+                            initialData={editingRowData }
                             fetchBookings={() => fetchBookings()}
                             isTenantAdmin={false}
                         />
@@ -263,6 +298,14 @@ const Booking = () => {
                             onClose={() => setShowMarkAsCompleted(false)}
                             label="Mark as Completed"
                             message="Are you sure to Mark the reservation as Completed!"
+                        />
+
+                        <AddTableForm
+                            isOpen={showAddTableForm}
+                            onClose={() => setShowAddTableForm(false)}
+                            tenantId={tenantId}
+                            locationId={locationId}
+                            toast={toast}
                         />
 
                         <div className="flex justify-start pt-4">
@@ -283,3 +326,269 @@ const Booking = () => {
 };
 
 export default Booking;
+
+// TODO: Remove after testing
+const AddTableForm = ({
+    isOpen,
+    onClose,
+    tenantId,
+    locationId,
+    toast
+}) => {
+    const [formData, setFormData] = useState({
+        tableNumber: '',
+        seats: '',
+        section: '',
+        status: 'available'
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const tableApi = new Api('/api/table/create-table/tenant')
+            const response = await tableApi.post(`/${tenantId}/location/${locationId}`, formData);
+            if (response.success) {
+                toast({ title: 'Table created successfully', variant: 'success' });
+                onClose();
+                // You might want to refresh tables here
+            } else {
+                setError(response.message || 'Failed to add table');
+            }
+        } catch (err) {
+            console.error('Add table error:', err);
+            setError('Failed to add table. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        // <div className="fixed inset-0 z-50 overflow-y-auto">
+        //   {/* Background overlay - click to close */}
+        //   <div 
+        //     className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        //     onClick={onClose}
+        //   ></div>
+
+        //   {/* Modal container - stops click propagation */}
+        //   <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        //     {/* This element is to trick the browser into centering the modal contents */}
+        //     <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        //     {/* Actual modal content */}
+        //     <div 
+        //       className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+        //       onClick={(e) => e.stopPropagation()} // Prevent clicks from closing modal
+        //     >
+        //       <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        //         <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+        //           Add New Table
+        //         </h3>
+
+        //         {error && (
+        //           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        //             {error}
+        //           </div>
+        //         )}
+
+        //         <form onSubmit={handleSubmit}>
+        //           <div className="space-y-4">
+        //             <div>
+        //               <label className="block text-sm font-medium text-gray-700">
+        //                 Table Number
+        //               </label>
+        //               <input
+        //                 type="text"
+        //                 name="tableNumber"
+        //                 value={formData.tableNumber}
+        //                 onChange={handleInputChange}
+        //                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 required
+        //               />
+        //             </div>
+
+        //             <div>
+        //               <label className="block text-sm font-medium text-gray-700">
+        //                 Number of Seats
+        //               </label>
+        //               <input
+        //                 type="number"
+        //                 name="seats"
+        //                 min="1"
+        //                 value={formData.seats}
+        //                 onChange={handleInputChange}
+        //                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 required
+        //               />
+        //             </div>
+
+        //             <div>
+        //               <label className="block text-sm font-medium text-gray-700">
+        //                 Section
+        //               </label>
+        //               <input
+        //                 type="text"
+        //                 name="section"
+        //                 value={formData.section}
+        //                 onChange={handleInputChange}
+        //                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 required
+        //               />
+        //             </div>
+
+        //             <div>
+        //               <label className="block text-sm font-medium text-gray-700">
+        //                 Status
+        //               </label>
+        //               <select
+        //                 name="status"
+        //                 value={formData.status}
+        //                 onChange={handleInputChange}
+        //                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //               >
+        //                 <option value="available">Available</option>
+        //                 <option value="reserved">Reserved</option>
+        //                 <option value="occupied">Occupied</option>
+        //                 <option value="out_of_service">Out of Service</option>
+        //               </select>
+        //             </div>
+        //           </div>
+
+        //           <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+        //             <button
+        //               type="submit"
+        //               disabled={loading}
+        //               className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm ${
+        //                 loading ? 'opacity-50 cursor-not-allowed' : ''
+        //               }`}
+        //             >
+        //               {loading ? 'Adding...' : 'Add Table'}
+        //             </button>
+        //             <button
+        //               type="button"
+        //               onClick={onClose}
+        //               className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+        //             >
+        //               Cancel
+        //             </button>
+        //           </div>
+        //         </form>
+        //       </div>
+        //     </div>
+        //   </div>
+        // </div>
+        <div className='fixed inset-0 z-50 flex items-center justify-center'>
+            <motion.div
+                className="absolute inset-0 bg-black"
+                onClick={onClose}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.2 }}
+                exit={{ opacity: 0 }}
+            />
+
+            <motion.div
+                initial={{ x: "70%" }}
+                animate={{ x: 0, opacity: 100 }}
+                exit={{ x: "70%", opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="relative z-50 h-auto w-full max-w-md bg-white rounded-4xl shadow-lg p-6 overflow-y-auto"
+            >
+                <div className="mb-5 flex justify-between items-center">
+                    <h2 className="text-xl font-semibold text-textPrimary">Add Table</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    {/* Full Name */}
+                    <div className='flex w-full items-center'>
+                        <label className="w-2/8 text-left text-sm text-textSecondary font-medium mb-1">Table Numer</label>
+                        <Input
+                            className="w-6/8 py-1.5 text-xs"
+                            placeholder="Enter table number"
+                            name="tableNumber"
+                            value={formData.tableNumber}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+
+                    <div className='flex w-full items-center'>
+                        <label className="w-2/8 text-left text-sm text-textSecondary font-medium mb-1">Seats</label>
+                        <Input
+                            className="w-6/8 py-1.5 text-xs"
+                            placeholder="Enter seat number"
+                            name="seats"
+                            value={formData.seats}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+
+                    {/* Email */}
+                    <div className='flex w-full items-center'>
+                        <label className="w-2/8 text-left text-sm text-textSecondary font-medium mb-1">Section</label>
+
+                        <select className="border p-1 w-full rounded-lg" name="section" value={formData.section} id="" onChange={handleInputChange}>
+                            <option value="">Select</option>
+                            <option value="bar area">Bar Area</option>
+                            <option value="patio">Patio</option>
+                            <option value="private room">Private Room</option>
+                            <option value="main dining">Main Dining</option>
+                        </select>
+                    </div>
+                    <div className='flex w-full items-center'>
+                        <label className="w-2/8 text-left text-sm text-textSecondary font-medium mb-1">Status</label>
+
+                        <select className="border p-1 w-full rounded-lg" disabled name="status" value={formData.status} id="" onChange={handleInputChange}>
+                            <option value="available">Available</option>
+                            <option value="out-of-service">Out of Service</option>
+                            <option value="reserved">Reserved</option>
+                            <option value="ocuppied">Ocuppied</option>
+                        </select>
+                    </div>
+
+
+                    <div className="pt-4 flex justify-end gap-3">
+                        <MainButton
+                            type="button"
+                            onClick={() => {
+                                onClose();
+                            }}
+                            className="bg-gray-600 px-3"
+                            radius='rounded-xl'
+                        >
+                            Cancel
+                        </MainButton>
+                        <MainButton
+                            type="submit"
+                            className="px-3"
+                            radius='rounded-xl'
+                            onClick={() => {
+                                // if (errors) {
+                                //     toast({ title: 'Please fill all required fields', variant: 'destructive' });
+                                // }
+                            }}
+                        >
+                            Save
+                        </MainButton>
+                    </div>
+                </form>
+            </motion.div>
+        </div>
+    );
+};

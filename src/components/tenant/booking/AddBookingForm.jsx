@@ -196,6 +196,25 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         value: opt.toLowerCase()
     }));
 
+    console.log('initialData', initialData)
+    useEffect(() => {
+        if (initialData){
+        setFormData({
+            customerName: initialData.customerName,
+            email: initialData.customer?.customerEmail,
+            phone: initialData.customerPhone,
+            partySize: initialData.partySize,
+            zipCode: initialData.customer?.customerZipCode,
+            source: initialData.source,
+            date: initialData.date,
+            time: initialData.time,
+            allergies: initialData.customer?.customerallergies,
+            specialRequest: initialData.specialRequests,
+            note: initialData.note
+        });
+    }
+    }, [initialData])
+
     if (!isOpen) return null;
 
     return (
