@@ -67,7 +67,7 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto bg-gray-50">
+      <main className="flex-1 overflow-hidden bg-gray-50">
         <Outlet />
       </main>
     </div>

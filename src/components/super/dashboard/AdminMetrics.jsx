@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import StatsCard from "@/components/common/StatsCard";
 import superAdminApi from "@/config/superAdminApi";
 
@@ -18,9 +17,9 @@ const AdminMetrics = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await axios.get("/api/superadmin/monthly-metrics");
-        if (response.data?.success) {
-          setMetrics(response.data.metrics);
+        const response = await superAdminApi.get("/monthly-metrics");
+        if (response?.success) {
+          setMetrics(response.metrics);
         }
       } catch (error) {
         console.error("Error fetching admin metrics:", error);
@@ -60,7 +59,7 @@ const AdminMetrics = () => {
           heading={stat.heading}
           isIncrease={stat.isIncrease}
           percentage={stat.percentage}
-          className="col-span-4 xl:col-span-3"
+          className="col-span-12 sm:col-span-4 xl:col-span-3"
         />
       ))}
     </>

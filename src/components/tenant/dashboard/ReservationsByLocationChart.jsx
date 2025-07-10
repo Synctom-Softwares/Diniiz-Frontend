@@ -66,7 +66,7 @@ const ReservationsByLocationChart = () => {
           <BarChart
             data={chartData}
             barSize={8}
-            margin={{ top: 10, right: 30, left: 30, bottom: 10 }}
+            margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
             layout="vertical"
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} />

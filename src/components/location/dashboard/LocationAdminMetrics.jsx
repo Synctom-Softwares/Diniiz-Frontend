@@ -94,7 +94,7 @@ const LocationAdminMetrics = () => {
           heading={stat.heading}
           isIncrease={stat.isIncrease}
           percentage={stat.percentage}
-          className="col-span-4 xl:col-span-3"
+          className="col-span-12 sm:col-span-4 xl:col-span-3"
         />
       ))}
     </>
