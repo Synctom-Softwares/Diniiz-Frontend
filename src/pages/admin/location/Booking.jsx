@@ -281,7 +281,7 @@ const Booking = () => {
                             isOpen={showEditForm}
                             onClose={() => setShowEditForm(false)}
                             label="Edit Booking"
-                            initialData={editingRowData }
+                            initialData={editingRowData}
                             fetchBookings={() => fetchBookings()}
                             isTenantAdmin={false}
                         />
@@ -305,7 +305,7 @@ const Booking = () => {
                             onClose={() => setShowAddTableForm(false)}
                             tenantId={tenantId}
                             locationId={locationId}
-                            toast={toast}
+                        // toast={toast}
                         />
 
                         <div className="flex justify-start pt-4">
@@ -332,8 +332,7 @@ const AddTableForm = ({
     isOpen,
     onClose,
     tenantId,
-    locationId,
-    toast
+    locationId
 }) => {
     const [formData, setFormData] = useState({
         tableNumber: '',
@@ -343,6 +342,8 @@ const AddTableForm = ({
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const { toast } = useToast()
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -370,6 +371,8 @@ const AddTableForm = ({
         } catch (err) {
             console.error('Add table error:', err);
             setError('Failed to add table. Please try again.');
+            toast({ title: err.message || 'Failed to add table. Please try again.', variant: 'destructive' });
+            onClose();
         } finally {
             setLoading(false);
         }
@@ -584,7 +587,10 @@ const AddTableForm = ({
                                 // }
                             }}
                         >
-                            Save
+                            {loading ? <div className="flex items-center gap-2">
+                                <span className="loader w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                                Loading...
+                            </div> : 'Save'}
                         </MainButton>
                     </div>
                 </form>
