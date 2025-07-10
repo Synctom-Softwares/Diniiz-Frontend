@@ -24,7 +24,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: 'src/widget/index.jsx',
+      entry: './src/widget/index.jsx',
       name: 'DiniizWidget',
       formats: ['umd'],
       fileName: () => 'widget.bundle.js',

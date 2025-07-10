@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ReservationWidgetWrapper from '../components/reservationWidgets/ReservationWidgetWrapper';
+import WidgetEntry from '../components/reservationwidgets/WidgetEntry';
 
 export const initWidget = (locationId, mountId = 'diniiz-widget') => {
   const mountElement = document.getElementById(mountId);
@@ -11,7 +11,7 @@ export const initWidget = (locationId, mountId = 'diniiz-widget') => {
 
   ReactDOM.createRoot(mountElement).render(
     <React.StrictMode>
-      <ReservationWidgetWrapper locationId={locationId} />
+      <WidgetEntry locationId={locationId} />
     </React.StrictMode>
   );
 };
