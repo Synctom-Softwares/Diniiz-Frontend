@@ -106,12 +106,15 @@ const Booking = () => {
         getAllLocations()
     }, [getAllLocations])
 
-    const isLoading = loading || localLoading;
+    const isLoading = localLoading;
     const hasError = error || localError;
     const hasFilters = clientType || (dateRange[0] && dateRange[1]) || source || table || location;
 
+
+    console.log('allBookings', allBookings)
+
     return (
-        <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff]">
+        <div className="p-4 mx-auto bg-[#f7f7ff]">
             <h1 className="text-2xl font-semibold text-center mb-6">Reservation</h1>
 
             <div className="rounded-2xl shadow bg-white p-4">
@@ -143,7 +146,7 @@ const Booking = () => {
                             </div>
                         </div>
                         
-                        <div className="flex flex-col md:items-center md:flex-row gap-4 w-full md:w-5/6 text-sm">
+                        <div className="flex flex-col md:items-center lg:flex-row gap-4 w-full md:w-5/6 text-sm">
                             <DropdownSelect
                                 label="Client Type"
                                 options={["New", "Returning", "VIP"].map((type) => ({

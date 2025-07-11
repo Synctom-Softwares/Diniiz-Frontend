@@ -131,7 +131,7 @@ const Tenants = () => {
   const isLoading = loading.tenants || loading.plans;
 
   return (
-    <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff] min-h-screen">
+    <div className="p-4  mx-auto bg-[#f7f7ff] min-h-screen">
       <h1 className="text-2xl font-semibold text-center mb-6">Tenant Management</h1>
 
       <div className="rounded-2xl shadow bg-white p-4 space-y-6">
@@ -256,7 +256,6 @@ const Tenants = () => {
               columns={superBookingHeadings}
               data={filteredData}
               actions={[
-                "Edit Detail",
                 "Upgrade / Downgrade",
                 "Suspend / Delete",
                 "View Access Endpoint"
