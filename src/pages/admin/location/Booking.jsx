@@ -9,7 +9,7 @@ import DateRangePicker from '@wojtekmaj/react-daterange-picker';
 import '@wojtekmaj/react-daterange-picker/dist/DateRangePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import { useDispatch, useSelector } from "react-redux";
-import { getAllReservations, getAllStaffReservations } from "../../../store/slices/location/reservationSlice";
+import { editReservation, getAllReservations, getAllStaffReservations } from "../../../store/slices/location/reservationSlice";
 import Loader from "../../../components/common/Loader";
 import locationApi from "../../../config/locationApi";
 import { motion } from "framer-motion";
@@ -28,9 +28,9 @@ const Booking = () => {
     const locationId = userData?.locationId;
     const tenantId = userData?.tenantId;
 
-    const [clientType, setClientType] = useState("");
+    const [clientType, setClientType] = useState({});
     const [dateRange, setDateRange] = useState([null, null]);
-    const [source, setSource] = useState("");
+    const [source, setSource] = useState({});
     const [tableId, setTableId] = useState("");
     const [partySize, setPartySize] = useState("");
     const [localLoading, setLocalLoading] = useState(false);
@@ -87,11 +87,11 @@ const Booking = () => {
     const handleFilter = useCallback(() => {
         const filters = {};
 
-        if (clientType) filters.clientType = clientType;
+        if (clientType) filters.clientType = clientType.value;
         if (dateRange && dateRange[0] && dateRange[1]) {
             filters.dateRange = [new Date(dateRange[0]).toISOString(), new Date(dateRange[1]).toISOString()]
         }
-        if (source) filters.source = source;
+        if (source) filters.source = source.value;
         if (tableId) filters.tableId = tableId;
         if (partySize) filters.partySize = partySize;
 
@@ -99,9 +99,9 @@ const Booking = () => {
     }, [clientType, dateRange, source, tableId, partySize, fetchBookings]);
 
     const handleResetFilters = useCallback(() => {
-        setClientType("");
+        setClientType({});
         setDateRange([null, null]);
-        setSource("");
+        setSource({});
         setTableId("");
         setPartySize("");
         fetchBookings(); // Fetch without filters
@@ -111,17 +111,63 @@ const Booking = () => {
         fetchBookings();
     }, [fetchBookings]);
 
-    const handleDropdownChange = (option, row) => {
-        if (option === "Edit Booking") {
-            setEditingRowData(row);
-            setShowEditForm(true);
-        } else if (option === "Cancel Booking") {
-            setShowCancelForm(true);
-        } else if (option === "No Show") {
-            setNoShowForm(true);
-        } else if (option === "Mark as Completed") {
-            setShowMarkAsCompleted(true);
+    const handleDropdownChange = async (option, row) => {
+    if (option === "Edit Booking") {
+        setEditingRowData(row);
+        setShowEditForm(true);
+    } else {
+        try {
+            let status;
+            if (option === "Cancel Booking") status = 'cancelled';
+            else if (option === "No Show") status = 'no-show';
+            else if (option === "Mark as Completed") status = 'completed';
+            
+            await handleStatusUpdate(row.bookingId, status);
+        } catch (error) {
+            console.error(`Failed to ${option.toLowerCase()}:`, error);
         }
+    }
+};
+
+    const handleStatusUpdate = async (bookingId, status) => {
+        try {
+            setLocalLoading(true);
+            const response = await dispatch(editReservation({
+                bookingId,
+                selectedStatus: status
+            }));
+
+            if (response.payload?.success) {
+                toast({
+                    title: getSuccessMessage(status),
+                    variant: 'success'
+                });
+                fetchBookings(); // Refresh the bookings list
+            } else {
+                toast({
+                    title: response.payload?.message || 'Failed to update booking status',
+                    variant: 'destructive'
+                });
+            }
+        } catch (error) {
+            toast({
+                title: 'An error occurred while updating booking status',
+                variant: 'destructive'
+            });
+            console.error('Status update error:', error);
+        } finally {
+            setLocalLoading(false);
+        }
+    };
+
+    // Helper function to get appropriate success message
+    const getSuccessMessage = (status) => {
+        const messages = {
+            'completed': 'Booking marked as completed successfully',
+            'cancelled': 'Booking cancelled successfully',
+            'no-show': 'Booking marked as no show successfully'
+        };
+        return messages[status] || 'Booking status updated successfully';
     };
 
     useEffect(() => {
@@ -143,11 +189,11 @@ const Booking = () => {
 
     const isLoading = loading || localLoading;
     const hasError = error || localError;
-    const hasFilters = clientType || (dateRange[0] && dateRange[1]) || source || tableId || partySize;
+    const hasFilters = clientType.value || (dateRange[0] && dateRange[1]) || source || tableId || partySize;
 
 
     return (
-        <div className="p-4 max-w-7xl mx-auto bg-[#f7f7ff]">
+        <div className="p-4  mx-auto bg-[#f7f7ff]">
             <h1 className="text-2xl font-semibold text-center mb-6">Reservation</h1>
 
             <div className="rounded-2xl shadow bg-white p-4">
@@ -168,11 +214,11 @@ const Booking = () => {
                 ) : (
                     <>
                         <div className="flex gap-4">
-                            <div className="flex flex-col justify-between my-4">
+                            <div className="flex flex-col  justify-between my-4">
                                 <div className="flex gap-3 text-sm">
                                     <Button
-                                        radius="rounded-xl"
-                                        className="px-2 py-1 shadow-none text-sm"
+                                        radius="rounded-3xl"
+                                        className="px-3 py-2  text-sm"
                                         onClick={() => setShowAddForm(true)}
                                     >
                                         Add Booking +
@@ -183,8 +229,8 @@ const Booking = () => {
                             <div className="flex flex-col justify-between my-4">
                                 <div className="flex gap-3 text-sm">
                                     <Button
-                                        radius="rounded-xl"
-                                        className="px-2 py-1 shadow-none text-sm"
+                                        radius="rounded-3xl"
+                                        className="px-3 py-2 text-sm"
                                         onClick={() => setShowAddTableForm(true)}
                                     >
                                         Add Table +
@@ -193,7 +239,7 @@ const Booking = () => {
                             </div>
                         </div>
 
-                        <div className="flex flex-col md:items-center md:flex-row gap-4 w-full md:w-7/8 text-sm">
+                        <div className="flex flex-col md:items-center lg:flex-row gap-4 w-full md:w-7/8 text-sm">
                             <DropdownSelect
                                 label="Client Type"
                                 options={["New", "Returning", "VIP"].map((type) => ({
@@ -201,19 +247,9 @@ const Booking = () => {
                                     label: type,
                                     value: type.toLowerCase()
                                 }))}
-                                selected={clientType}
-                                onChange={(opt) => setClientType(opt.value)}
+                                selected={clientType.label}
+                                onChange={(opt) => setClientType(opt)}
                             />
-
-                            <div className="flex items-center gap-2">
-                                <label className="text-sm text-textPrimary mb-1">Date Range</label>
-                                <DateRangePicker
-                                    onChange={setDateRange}
-                                    value={dateRange}
-                                    className="react-daterange-picker-custom rounded-2xl"
-                                    clearIcon={null}
-                                />
-                            </div>
 
                             <DropdownSelect
                                 label="Source"
@@ -222,15 +258,15 @@ const Booking = () => {
                                     label: type,
                                     value: type.toLowerCase()
                                 }))}
-                                selected={source}
-                                onChange={(opt) => setSource(opt.value)}
+                                selected={source.label}
+                                onChange={(opt) => setSource(opt)}
                             />
 
                             <DropdownSelect
                                 label="Table"
                                 options={allTables?.map((table) => ({
                                     id: table._id,
-                                    label: table._id,
+                                    label: table.tableNumber,
                                     value: table._id
                                 }))}
                                 selected={tableId}
@@ -238,7 +274,7 @@ const Booking = () => {
                             />
 
                             <DropdownSelect
-                                label="Party Size"
+                                label="Party"
                                 options={["1", "2", "3", "4", "5", "6", "7", "8"].map((size) => ({
                                     id: size,
                                     label: size,
@@ -248,9 +284,20 @@ const Booking = () => {
                                 onChange={(opt) => setPartySize(opt.value)}
                             />
 
+                            
+                            <div className="flex items-center gap-2 w-full">
+                                <label className="text-sm text-textPrimary mb-1">Date Range</label>
+                                <DateRangePicker
+                                    onChange={setDateRange}
+                                    value={dateRange}
+                                    className="react-daterange-picker-custom rounded-2xl w-full"
+                                    clearIcon={null}
+                                />
+                            </div>
+
                             <Button
                                 radius="rounded-xl"
-                                className="px-5 py-1 shadow-none"
+                                className="px-5 py-1 w-full shadow-none"
                                 onClick={handleFilter}
                             >
                                 Filter
@@ -259,7 +306,7 @@ const Booking = () => {
                             {hasFilters && (
                                 <Button
                                     radius="rounded-xl"
-                                    className="px-5 py-1 shadow-none bg-amber-300"
+                                    className="px-5 w-full py-1 shadow-none bg-amber-300"
                                     onClick={handleResetFilters}
                                 >
                                     Reset
@@ -286,18 +333,29 @@ const Booking = () => {
                             isTenantAdmin={false}
                         />
 
+
                         <ConfirmationModal
                             isOpen={showCancelForm}
                             onClose={() => setShowCancelForm(false)}
+                            onConfirm={() => handleStatusUpdate(editingRowData?.bookingId, 'cancelled')}
                             label="Cancel Booking"
-                            message="Are you sure to cancel the reservation!"
+                            message="Are you sure to cancel the reservation?"
+                        />
+
+                        <ConfirmationModal
+                            isOpen={noShowForm}
+                            onClose={() => setNoShowForm(false)}
+                            onConfirm={() => handleStatusUpdate(editingRowData?.bookingId, 'no-show')}
+                            label="Mark as No Show"
+                            message="Are you sure to mark this reservation as No Show?"
                         />
 
                         <ConfirmationModal
                             isOpen={showMarkAsCompleted}
                             onClose={() => setShowMarkAsCompleted(false)}
+                            onConfirm={() => handleStatusUpdate(editingRowData?.bookingId, 'completed')}
                             label="Mark as Completed"
-                            message="Are you sure to Mark the reservation as Completed!"
+                            message="Are you sure to mark this reservation as Completed?"
                         />
 
                         <AddTableForm

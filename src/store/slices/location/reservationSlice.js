@@ -16,7 +16,7 @@ export const getAllReservations = createAsyncThunk(
   "reservation/getAllReservations",
   async (params, { rejectWithValue }) => {
     const { locationId, clientType, dateRange, source, tableId, partySize } = params;
-    
+
     // Build query parameters
     const queryParams = new URLSearchParams();
     if (clientType) queryParams.append('clientType', clientType);
@@ -39,11 +39,19 @@ export const getAllReservations = createAsyncThunk(
         customerName: r.customer?.customerName,
         partySize: r.partySize,
         customerType: r.customer?.customerType,
-        date: new Date(r.date).toLocaleDateString(),
+        date: r.date?.slice(0, 10),
         time: r.time,
-        table: r.tableId,
+        table:`Table ${r.tableId[0]?.tableNumber}`,
         source: r.source,
-        action: null
+        action: null,
+        email: r.customer?.customerEmail,
+        phone: r.customer?.customerPhone,
+        zipCode: r.customer?.customerZipCode,
+        allergies: r.allergies,
+        specialRequests: r.specialRequests,
+        status: r.status,
+        tableId: r.tableId[0]?._id,
+        tenantId: r.tenantId
       }))
     };
   }
@@ -53,7 +61,7 @@ export const getAllStaffReservations = createAsyncThunk(
   "reservation/getAllStaffReservations",
   async (params, { rejectWithValue }) => {
     const { locationId, staffId, clientType, dateRange, source, tableId, partySize } = params;
-    
+
     // Build query parameters
     const queryParams = new URLSearchParams();
     if (clientType) queryParams.append('clientType', clientType);
@@ -75,7 +83,7 @@ export const getAllStaffReservations = createAsyncThunk(
         customerName: r.customer?.customerName,
         partySize: r.partySize,
         customerType: r.customer?.customerType,
-        date: new Date(r.date).toLocaleDateString(),
+        date: new Date(r.date).toLocaleDateString().slice(0, 10),
         time: r.time,
         table: r.tableId,
         source: r.source,
@@ -90,7 +98,7 @@ export const createReservation = createAsyncThunk(
   "reservation/createReservation",
   async ({ locationId, tableId, body }, { rejectWithValue }) => {
     const { data, error } = await asyncHandler(() =>
-      reservationApi.post(`/locations/${locationId}/tables/${tableId}`, body) 
+      reservationApi.post(`/locations/${locationId}/tables/${tableId}`, body)
     );
 
     if (error) return rejectWithValue(error);
@@ -100,15 +108,21 @@ export const createReservation = createAsyncThunk(
 
 export const editReservation = createAsyncThunk(
   "reservation/editReservation",
-  async (_, { rejectWithValue }) => {
+  async ({ bookingId, selectedStatus }, { rejectWithValue }) => {
+
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (selectedStatus) queryParams.append('selectedStatus', selectedStatus);
+
     const { data, error } = await asyncHandler(() =>
-      locationApi.put('/reservation', data) // TODO: change route
+      reservationApi.put(`/${bookingId}/status?${queryParams.toString()}`, '')
     );
 
     if (error) return rejectWithValue(error);
     return data;
   }
 );
+
 
 
 const reservationSlice = createSlice({
@@ -141,7 +155,7 @@ const reservationSlice = createSlice({
       })
       .addCase(getAllReservations.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || { message: "Fetching reservations failed" };
+        state.error = action.payload.message || "Fetching reservations failed";
       })
 
       //create reservation
@@ -156,7 +170,7 @@ const reservationSlice = createSlice({
       })
       .addCase(createReservation.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || { message: "Creating reservation failed" };
+        state.error = action.payload.message || "Creating reservation failed";
       })
 
       .addCase(editReservation.pending, (state) => {
@@ -171,7 +185,7 @@ const reservationSlice = createSlice({
       })
       .addCase(editReservation.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || { message: "editing reservation failed" };
+        state.error = action.payload.message || "editing reservation failed";
       })
 
   },

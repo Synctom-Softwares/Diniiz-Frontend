@@ -22,7 +22,7 @@ const WidgetEntry = ({locationId}) => {
     <>
       <WidgetFAB onClick={() => setIsOpen((prev) => !prev)} />
       <ReservationWidgetModal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <ReservationWidgetWrapper locationId={locationId} />
+        <ReservationWidgetWrapper locationId={'AB002L1'} />
       </ReservationWidgetModal>
     </>
   );

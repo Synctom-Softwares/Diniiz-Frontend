@@ -26,6 +26,7 @@ import { ToastContainer } from 'react-toastify'
 import { Toaster } from '../src/components/common/toast/Toaster.jsx'
 import SuccessPage from '../src/pages/payment/SuccessPage.jsx'
 import FailurePage from '../src/pages/payment/FailurePage.jsx'
+import WidgetTestPage from './testWidget/WidgetTestPage.jsx'
 
 
 
@@ -80,6 +81,11 @@ const router = createBrowserRouter([
   {
     path: "/payment/fail",
     element: <FailurePage />
+  },
+  //test for widget
+  {
+    path: "/widget-test",
+    element: <WidgetTestPage />
   },
 
   {

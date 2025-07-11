@@ -1,17 +1,28 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import WidgetEntry from '../components/reservationwidgets/WidgetEntry';
+import WidgetEntry from './components/reservationwidgets/WidgetEntry';
 
-export const initWidget = (locationId, mountId = 'diniiz-widget') => {
-  const mountElement = document.getElementById(mountId);
-  if (!mountElement) {
-    console.error('Diniiz widget mount point not found!');
-    return;
-  }
-
-  ReactDOM.createRoot(mountElement).render(
-    <React.StrictMode>
+// Simple component that matches your working example
+function WidgetContainer({ locationId }) {
+  return (
+    <div >
       <WidgetEntry locationId={locationId} />
-    </React.StrictMode>
+    </div>
   );
+}
+
+// Global initialization function
+window.DiniizWidget = {
+  init: function(locationId) {
+    const container = document.getElementById('diniiz-widget-container');
+    if (!container) {
+      console.error('Container element not found');
+      return;
+    }
+    
+    const root = window.ReactDOM.createRoot(container);
+    root.render(
+      <window.React.StrictMode>
+        <WidgetContainer locationId={locationId} />
+      </window.React.StrictMode>
+    );
+  }
 };

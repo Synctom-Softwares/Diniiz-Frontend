@@ -82,7 +82,7 @@ class Api {
   // PUT (e.g., update)
   async put(endpoint, id = "", data = {}) {
     try {
-      const res = await instance.put(`${this.endpoint}${endpoint}/${id}`, data);
+      const res = await instance.put(`${this.endpoint}${endpoint}`, data);
       return res.data;
     } catch (err) {
       this.handleError(err);

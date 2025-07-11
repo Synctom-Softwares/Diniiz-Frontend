@@ -36,11 +36,11 @@ const ReservationWidgetWrapper = ({ locationId }) => {
 
 
     return (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4 w-full font-inter">
             {/* ✅ Step Checkpoints */}
             <h2 className="text-xl font-semibold text-center text-textPrimary">{step ===4 ? 'Reservation Confirmed' : 'Make Reservation'}</h2>
             {
-                !step ===4 &&
+
                 <div className="flex justify-center gap-6 text-sm font-medium">
                 <div className={`flex items-center py-2 px-1 gap-2 ${step === 1 ? "border-b-2 border-b-widgetColor" : "text-gray-500"}`}>
                     <div

@@ -41,4 +41,5 @@ export default defineConfig({
     outDir: 'dist/widget',
     emptyOutDir: true,
   },
+
 })
