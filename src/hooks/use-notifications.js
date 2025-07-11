@@ -10,7 +10,6 @@ export const useNotifications = ({ role = "user" }) => {
   } = useSelector((state) => state.auth);
   const socket = useSocket();
 
-  // Fetch initial notifications
   useEffect(() => {
     const notificationsApi = new Api("/api/notifications");
     const getNotifications = async () => {
@@ -24,7 +23,6 @@ export const useNotifications = ({ role = "user" }) => {
     getNotifications();
   }, [role, userId]);
 
-  // Handle real-time notifications and audio
   useEffect(() => {
     const notificationSound = new Audio("/notification-sound.wav");
     notificationSound.volume = 1;
@@ -64,18 +62,6 @@ export const useNotifications = ({ role = "user" }) => {
     if (socket) {
       socket.on("new-notification", (notification) => {
         setNotifications((prev) => [...prev, notification]);
-        playSound();
-      });
-
-      socket.on("socket-testing", () => {
-        setNotifications((prev) => [
-          ...prev,
-          {
-            _id: 123,
-            message: "It works",
-            createdAt: "2025-07-10T15:31:44.868Z",
-          },
-        ]);
         playSound();
       });
     }

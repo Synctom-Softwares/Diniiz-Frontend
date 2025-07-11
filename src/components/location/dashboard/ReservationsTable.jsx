@@ -10,8 +10,9 @@ import {
 import { useSelector } from "react-redux";
 import locationApi from "@/config/locationApi";
 import { Badge } from "@/components/ui/badge";
-import { usePagination } from "@/hooks/usePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import PaginationControls from "@/components/common/PaginationControls";
+import useSocketEvent from "@/hooks/use-socket-event";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -38,36 +39,39 @@ const ReservationsTable = () => {
     goToPreviousPage,
   } = usePagination(reservations, ITEMS_PER_PAGE);
 
+  const fetchReservations = async () => {
+    try {
+      const response = await locationApi.get(`/${locationId}/reservations`);
+
+      let reservationList = [];
+      let count = 0;
+
+      reservationList = response.reservations;
+      count = response.count ?? response.reservations.length ?? 0;
+
+      console.log(reservationList);
+
+      const formattedData = reservationList.map((reservation) => ({
+        customerName: reservation.customer?.customerName || "",
+        partySize: reservation.partySize,
+        date: reservation.date
+          ? new Date(reservation.date).toLocaleDateString()
+          : "",
+        time: reservation.time,
+        tableIds: reservation.tableId?.map((tableId) => tableId._id),
+        phone: reservation.customer?.customerPhone || "",
+      }));
+      setReservations(formattedData);
+      setTotalCount(count);
+    } catch (error) {
+      console.error("Error fetching reservations:", error);
+    }
+  };
   useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        const response = await locationApi.get(`/${locationId}/reservations`);
-
-        let reservationList = [];
-        let count = 0;
-
-        reservationList = response.reservations;
-        count = response.count ?? response.reservations.length ?? 0;
-
-        const formattedData = reservationList.map((reservation) => ({
-          customerName: reservation.customer?.customerName || "",
-          partySize: reservation.partySize,
-          date: reservation.date
-            ? new Date(reservation.date).toLocaleDateString()
-            : "",
-          time: reservation.time,
-          tableId: reservation.tableId,
-          phone: reservation.customer?.customerPhone || "",
-        }));
-        setReservations(formattedData);
-        setTotalCount(count);
-      } catch (error) {
-        console.error("Error fetching reservations:", error);
-      }
-    };
-
     fetchReservations();
-  }, [locationId]);
+  }, []);
+
+  useSocketEvent("new-booking", fetchReservations);
 
   return (
     <div className="w-full min-h-[250px] bg-white rounded-2xl">
@@ -97,10 +101,10 @@ const ReservationsTable = () => {
                 <TableCell>{reservation.partySize}</TableCell>
                 <TableCell>{reservation.date}</TableCell>
                 <TableCell>{reservation.time}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {renderTableName(reservation.tableId)}
-                  </Badge>
+                <TableCell className="max-w-32 flex flex-wrap gap-1">
+                  {reservation.tableIds.map((tableId) => (
+                    <Badge variant="outline">{renderTableName(tableId)}</Badge>
+                  ))}
                 </TableCell>
                 <TableCell>{reservation.phone}</TableCell>
               </TableRow>

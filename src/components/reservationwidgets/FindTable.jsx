@@ -6,8 +6,6 @@ import MainButton from "../common/buttons/MainButton";
 import DropdownSelect from "../common/DropdownSelect";
 import { getAvailableTables } from "../reservationwidgets/widgetApi";
 
-console.log('getAvailableTables', getAvailableTables)
-
 const FindTable = ({ data, update, onContinue, locationId }) => {
     const [showTables, setShowTables] = useState(false);
     const [availableTimeSlots, setAvailableTimeSlots] = useState([]);

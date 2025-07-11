@@ -68,9 +68,9 @@
   --color-walkins: #52B552;
   --color-input-background: #F6F7FB;
 
-  --font-inter: Inter, "sans-serif",
+  --font-inter: Inter, "sans-serif";
 
-    --font-poppins: "Poppins", "Inter";
+  --font-poppins: "Poppins", "Inter";
   --font-inter: "Poppins", "Inter";
   --font-rubik: "Rubik", "Rubik";
 
@@ -106,6 +106,9 @@
   --color-toast-destructive: 0 84.2% 60.2%;
   --color-toast-destructive-foreground: 210 40% 98%;
   --color-toast-border: 214.3 31.8% 91.4%;
+
+  --color-status-active: #4ADE80;
+  --color-status-suspended: #F87171;
 }
 
 @keyframes float {
@@ -284,7 +287,6 @@
   h2,
   h3,
   h4 {
-    font-family: "Playfair Display"
-
+    font-family: "Playfair Display";
   }
 }

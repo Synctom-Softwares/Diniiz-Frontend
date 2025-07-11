@@ -1,8 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || `https://diniiz-backend.onrender.com`;
 const tenantApi = createApi({
+  reducerPath: "tenantApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `https://diniiz-backend.onrender.com/api/tenants`,
+    baseUrl: `${BASE_URL}api/tenants`,
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
     }

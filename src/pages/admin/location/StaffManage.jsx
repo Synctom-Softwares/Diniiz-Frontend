@@ -33,8 +33,8 @@ import EditStaffDialog from "@/components/location/staffManage/EditStaffDialog";
 import SuspendStaffDialog from "@/components/location/staffManage/SuspendStaffDialog";
 import ReactivateStaffDialog from "@/components/location/staffManage/ReactivateStaff";
 import DeleteStaffDialog from "@/components/location/staffManage/DeleteStaffDialog";
-import { capitalize, parseStaffId } from "@/lib";
-import { usePagination } from "@/hooks/usePagination";
+import { parseStaffId } from "@/lib";
+import { usePagination } from "@/hooks/use-pagination";
 import PaginationControls from "@/components/common/PaginationControls";
 import { Input } from "@/components/ui/input";
 import {
@@ -199,7 +199,7 @@ export default function StaffManage() {
       await locationApi.put(`/${locationId}/staff/${staff._id}/suspend`);
       setStaffList((prev) =>
         prev.map((s) =>
-          s._id === staff._id ? { ...s, status: "suspended" } : s
+          s._id === staff._id ? { ...s, status: "suspend" } : s
         )
       );
       closeDialog();
@@ -238,7 +238,7 @@ export default function StaffManage() {
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="suspend">Suspended</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -272,7 +272,6 @@ export default function StaffManage() {
               <TableRow className="text-base *:text-black/70">
                 <TableHead>Staff ID</TableHead>
                 <TableHead>Staff Name</TableHead>
-                <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Assigned To</TableHead>
                 <TableHead>Actions</TableHead>
@@ -296,25 +295,22 @@ export default function StaffManage() {
                   <TableRow key={staff._id}>
                     <TableCell>{staff.staffId || staff._id || "-"}</TableCell>
                     <TableCell>{staff.name || "-"}</TableCell>
-                    <TableCell>{capitalize(staff.role) || "Staff"}</TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"
-                        className={cn("text-white px-4 py-1 rounded-full", {
-                          "bg-success/80": staff.status === "active",
-                          "bg-destructive/80": staff.status !== "active",
+                        className={cn("text-white px-4 py-1 rounded-full capitalize", {
+                          "bg-status-active": staff.status === "active",
+                          "bg-status-suspended": staff.status == "suspend",
                         })}
                       >
-                        {capitalize(staff.status)}
+                        {staff.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap max-w-40 items-center gap-2 text-center">
                         {staff.assignedTables && staff.assignedTables.length > 0
                           ? staff.assignedTables.map((table) => (
-                              <Badge
-                                variant="outline"
-                              >
+                              <Badge variant="outline">
                                 {table.split("-").at(-1)}
                               </Badge>
                             ))

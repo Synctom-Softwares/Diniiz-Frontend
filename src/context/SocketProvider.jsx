@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import { fireSocketEventCallbacks } from "./SocketEventRegistry";
 
 const SocketContext = createContext();
 
@@ -34,6 +35,10 @@ const SocketProvider = ({ children }) => {
       console.log("Online users:", users);
     });
 
+    newSocket.on("socket-testing", () => {
+      fireSocketEventCallbacks("socket-test")
+    });
+    
     setSocket(newSocket);
     console.log("SOCKET CREATION", newSocket);
     return () => newSocket.disconnect();

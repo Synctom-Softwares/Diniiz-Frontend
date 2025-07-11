@@ -7,18 +7,16 @@ import locationSlice from "../slices/tenant/locationSlice"
 import reservationSlice from "../slices/location/reservationSlice"
 import tenantApi from '../services/tenantApi';
 
-
-
 const store = configureStore({
     reducer: {
         auth: authSlice,
         plan: planSlice,
         tenants: tenantSlice,
         booking: bookingSlice,
-        location:locationSlice,
+        location: locationSlice,
         reservation: reservationSlice,
 
-        [tenantApi.reducerPath]: tenantApi.reducer
+        [tenantApi.reducerPath]: tenantApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(tenantApi.middleware)
 });

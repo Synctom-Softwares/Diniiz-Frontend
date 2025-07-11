@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Loader2 } from "lucide-react";
 import superAdminApi from "@/config/superAdminApi";
 import { PLAN_COLORS, PLAN_LABELS } from "@/constants/plansData";
+import useSocketEvent from "@/hooks/use-socket-event";
 
 const chartConfig = {
   users: {
@@ -31,33 +36,38 @@ const PlanDistributionChart = () => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    superAdminApi
-      .get("/plans/buyer-percentage")
-      .then((res) => {
-        const apiPercentages = res?.percentages || {};
-        console.log(apiPercentages)
+  const fetchData = async () => {
+    try {
+      const res = await superAdminApi.get("/plans/buyer-percentage")
+      const apiPercentages = res?.percentages || {}
+      
+      // Convert percentages to numbers and build chart data
+      const data = Object.entries(apiPercentages).map(([type, percent]) => ({
+        type,
+        percent: parseFloat(percent),
+        fill: PLAN_COLORS[type] || "#8884d8",
+      }))
+      setChartData(data)
+    } catch {
+      // fallback to dummy data if API fails
+      const fallback = [
+        { type: "pro", percent: 12.5, fill: PLAN_COLORS.pro },
+        { type: "enterprise", percent: 25.0, fill: PLAN_COLORS.enterprise },
+        { type: "premium", percent: 62.5, fill: PLAN_COLORS.premium },
+        { type: "starter", percent: 0.0, fill: PLAN_COLORS.starter },
+      ]
+      setChartData(fallback)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-        // Convert percentages to numbers and build chart data
-        const data = Object.entries(apiPercentages).map(([type, percent]) => ({
-          type,
-          percent: parseFloat(percent),
-          fill: PLAN_COLORS[type] || "#8884d8",
-        }));
-        setChartData(data);
-      })
-      .catch(() => {
-        // fallback to dummy data if API fails
-        const fallback = [
-          { type: "pro", percent: 12.50, fill: PLAN_COLORS.pro },
-          { type: "enterprise", percent: 25.00, fill: PLAN_COLORS.enterprise },
-          { type: "premium", percent: 62.50, fill: PLAN_COLORS.premium },
-          { type: "starter", percent: 0.00, fill: PLAN_COLORS.starter },
-        ];
-        setChartData(fallback);
-      })
-      .finally(() => setLoading(false));
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  useSocketEvent("plan-bought", fetchData);
+
 
   if (loading) return <Loader2 size={20} className="animate-spin" />;
 
@@ -81,7 +91,9 @@ const PlanDistributionChart = () => {
                     const entry = chartData.find((d) => d.type === name);
                     if (!entry) return [null];
                     return [
-                      `${PLAN_LABELS[entry.type] || entry.type}: ${entry.percent.toFixed(2)}%`,
+                      `${
+                        PLAN_LABELS[entry.type] || entry.type
+                      }: ${entry.percent.toFixed(2)}%`,
                     ];
                   }}
                 />
@@ -104,7 +116,7 @@ const PlanDistributionChart = () => {
           </PieChart>
         </ResponsiveContainer>
       </ChartContainer>
-      <div className="flex gap-4 items-center flex-wrap">
+      <div className="flex gap-4 items-center justify-center flex-wrap px-2">
         {chartData.map((entry, index) => (
           <div key={index} className="flex items-center gap-2">
             <div

@@ -9,11 +9,11 @@ const formatter = Intl.DateTimeFormat("en", {
 
 const Updates = () => {
   const { notifications } = useNotifications({
-    role: "user"
+    role: "user",
   });
 
   return (
-    <div className="px-2 py-4 h-full">
+    <div className="px-2 py-4 h-full overflow-hidden">
       <h2 className="pb-2 text-black/70 font-semibold text-center">
         Recent Updates
       </h2>
@@ -23,7 +23,7 @@ const Updates = () => {
         </div>
       )}
       {notifications.length > 0 && (
-        <ScrollArea className="h-74 md:h-full">
+        <ScrollArea className="h-74 md:h-full max-h-[500px] ">
           <div className="grid gap-0.5">
             {notifications.map((notification) => (
               <div

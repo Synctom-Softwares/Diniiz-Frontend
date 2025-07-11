@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import locationApi from "@/config/locationApi";
+import useSocketEvent from "@/hooks/use-socket-event";
 
 const LOCATION_COLORS = {
   reservations: "#6640FF",
@@ -32,56 +33,57 @@ const ReservationChart = () => {
   const {
     userData: { locationId },
   } = useSelector((state) => state.auth);
+  
+  const fetchData = async () => {
+    try {
+      const response = await locationApi.get(
+        `/${locationId}/resrAndWalkin`
+      );
+      const stats = response.stats;
+      console.log(stats,"stats")
+      const total = stats.totalReservations + stats.totalWalkIns;
 
+      const data = [
+        {
+          type: "reservations",
+          customers: stats.totalReservations,
+          percent: total === 0 ? 0 : (stats.totalReservations / total) * 100,
+          fill: LOCATION_COLORS.reservations,
+        },
+        {
+          type: "walkins",
+          customers: stats.totalWalkIns,
+          percent: total === 0 ? 0 : (stats.totalWalkIns / total) * 100,
+          fill: LOCATION_COLORS.walkins,
+        },
+      ];
+      setChartData(data);
+    } catch (error) {
+      const fallback = [
+        {
+          type: "reservations",
+          customers: 0,
+          percent: 0,
+          fill: LOCATION_COLORS.reservations,
+        },
+        {
+          type: "walkins",
+          customers: 0,
+          percent: 0,
+          fill: LOCATION_COLORS.walkins,
+        },
+      ];
+      toast.error(error.message)
+      setChartData(fallback);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await locationApi.get(
-          `/${locationId}/resrAndWalkin`
-        );
-        const stats = response.stats;
-        console.log(stats,"stats")
-        const total = stats.totalReservations + stats.totalWalkIns;
-
-        const data = [
-          {
-            type: "reservations",
-            customers: stats.totalReservations,
-            percent: total === 0 ? 0 : (stats.totalReservations / total) * 100,
-            fill: LOCATION_COLORS.reservations,
-          },
-          {
-            type: "walkins",
-            customers: stats.totalWalkIns,
-            percent: total === 0 ? 0 : (stats.totalWalkIns / total) * 100,
-            fill: LOCATION_COLORS.walkins,
-          },
-        ];
-        setChartData(data);
-      } catch (error) {
-        const fallback = [
-          {
-            type: "reservations",
-            customers: 0,
-            percent: 0,
-            fill: LOCATION_COLORS.reservations,
-          },
-          {
-            type: "walkins",
-            customers: 0,
-            percent: 0,
-            fill: LOCATION_COLORS.walkins,
-          },
-        ];
-        toast.error(error.message)
-        setChartData(fallback);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [locationId]);
+  }, []);
+
+  useSocketEvent("new-booking", fetchData);
 
   if (loading) return <Loader2 size={20} className="animate-spin" />;
 

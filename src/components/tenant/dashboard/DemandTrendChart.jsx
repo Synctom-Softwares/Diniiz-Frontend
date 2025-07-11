@@ -18,6 +18,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { useSelector } from "react-redux";
 import tenantApi from "@/config/tenantApi";
 import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const chartConfig = {
   reservations: {
@@ -43,8 +44,8 @@ const DemandTrendChart = () => {
       setLoading(true);
       try {
         const res = await tenantApi.get(
-          `/VS001/reservationsPerDays?days=${days}`
-        ); // TODO: MAKE THE TENANT ID DYNAMIC
+          `/${tenantId}/reservationsPerDays?days=${days}`
+        );
         if (!res.success && !res.reservationsPerDates) { setChartData([]); return; }
         const obj = res.reservationsPerDates;
         const arr = Object.entries(obj)
@@ -66,6 +67,7 @@ const DemandTrendChart = () => {
         });
         setChartData(arr);
       } catch (error) {
+        toast.error(error?.message)
         setChartData([]);
       }
       setLoading(false);

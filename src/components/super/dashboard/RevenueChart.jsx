@@ -14,6 +14,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Loader2 } from "lucide-react";
+import useSocketEvent from "@/hooks/use-socket-event";
 
 const chartConfig = {
   revenue: {
@@ -26,26 +27,28 @@ const RevenueChart = () => {
   const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("/api/superadmin/revenue");
-        if (response.data.success) {
-          const formattedData = response.data.revenueByMonth.map((item) => ({
-            displayDate: item.month,
-            revenue: item.revenue,
-          }));
-          setChartData(formattedData);
-        }
-      } catch (error) {
-        console.error("Error fetching revenue data:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("/api/superadmin/revenue");
+      if (response.data.success) {
+        const formattedData = response.data.revenueByMonth.map((item) => ({
+          displayDate: item.month,
+          revenue: item.revenue,
+        }));
+        setChartData(formattedData);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching revenue data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
+
+  useSocketEvent("plan-bought", fetchData);
 
   if (isLoading) {
     return (

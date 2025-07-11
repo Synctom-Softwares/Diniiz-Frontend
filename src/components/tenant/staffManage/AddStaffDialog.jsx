@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function AddStaffDialog({
   open,
@@ -49,7 +50,7 @@ export default function AddStaffDialog({
       setForm({ name: "", password: "", locationId: "" });
       onClose();
     } catch (error) {
-      console.log(error?.message)
+      toast.error(error?.message || "Failed to add staff");
     }
   };
 

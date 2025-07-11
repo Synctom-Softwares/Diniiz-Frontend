@@ -2,17 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import moment from "moment-timezone";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import Api from "@/config/api";
-import { CustomTimePicker } from "@/components/tenant/setting/TimePicker";
+import LocationForm from "@/components/tenant/setting/LocationForm";
+import DeleteLocationDialog from "@/components/tenant/setting/DeleteLocationDialog";
 
 const Location = () => {
   const [locations, setLocations] = useState([]);
@@ -54,6 +44,7 @@ const Location = () => {
   // Initialize API instance
   const locationApi = new Api(`/api/locations/all/tenants/${tenantId}`);
   const userApi = new Api("/api/users");
+  const addLocationApi = new Api(`/api/tenants/${tenantId}/locations`);
 
   const [formData, setFormData] = useState({
     locationName: "",
@@ -65,13 +56,11 @@ const Location = () => {
     adminEmail: "",
     twilioNumber: "",
     smsTemplate: "",
-    // Meal timings
-    breakfastFrom: "",
-    breakfastTo: "",
-    lunchFrom: "",
-    lunchTo: "",
-    dinnerFrom: "",
-    dinnerTo: "",
+    mealTimings: {
+      breakfast: { start: "", end: "" },
+      lunch: { start: "", end: "" },
+      dinner: { start: "", end: "" },
+    },
   });
 
   // For adminEmail validation
@@ -79,7 +68,7 @@ const Location = () => {
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const debounceTimeout = useRef(null);
 
-  // For meal timing validation
+  //  For meal timing validation
   const [mealTimingErrors, setMealTimingErrors] = useState({});
 
   // SMS Template variables
@@ -104,18 +93,6 @@ const Location = () => {
     // If in 12h format, convert to 24h
     const time = moment(timeStr, ["h:mm A", "hh:mm A"]);
     return time.isValid() ? time.format("HH:mm") : timeStr;
-  };
-
-  // Helper function to format time for display based on selected format
-  const formatTimeForDisplay = (timeStr) => {
-    if (!timeStr) return "";
-
-    const time24 = convertTo24Hour(timeStr);
-    if (timeFormat === "12h") {
-      const time = moment(time24, "HH:mm");
-      return time.isValid() ? time.format("h:mm A") : timeStr;
-    }
-    return time24;
   };
 
   // Function to insert variable into SMS template at cursor position
@@ -153,6 +130,7 @@ const Location = () => {
         const response = await locationApi.get("");
         console.log(response);
         if (response && response.locations) {
+          console.log(response.locations);
           setLocations(response.locations);
         } else {
           setLocations([]);
@@ -238,60 +216,42 @@ const Location = () => {
     const errors = {};
     const timings = [];
 
-    // Helper to compare time strings (convert to 24h format first)
-    const isBefore = (a, b) => {
-      const timeA = convertTo24Hour(a);
-      const timeB = convertTo24Hour(b);
-      return timeA < timeB;
-    };
+    // Helper to compare time strings and convert to 24h format
+    const isBefore = (a, b) => convertTo24Hour(a) < convertTo24Hour(b);
+    const to24h = (time) => convertTo24Hour(time);
 
-    // Collect all meal timings that have both from and to times
-    if (formData.breakfastFrom && formData.breakfastTo) {
-      timings.push({
+    // Define meal periods
+    const mealPeriods = [
+      {
         name: "Breakfast",
-        from: convertTo24Hour(formData.breakfastFrom),
-        to: convertTo24Hour(formData.breakfastTo),
-      });
-    }
-    if (formData.lunchFrom && formData.lunchTo) {
-      timings.push({
-        name: "Lunch",
-        from: convertTo24Hour(formData.lunchFrom),
-        to: convertTo24Hour(formData.lunchTo),
-      });
-    }
-    if (formData.dinnerFrom && formData.dinnerTo) {
-      timings.push({
-        name: "Dinner",
-        from: convertTo24Hour(formData.dinnerFrom),
-        to: convertTo24Hour(formData.dinnerTo),
-      });
-    }
+        from: formData.breakfastFrom,
+        to: formData.breakfastTo,
+      },
+      { name: "Lunch", from: formData.lunchFrom, to: formData.lunchTo },
+      { name: "Dinner", from: formData.dinnerFrom, to: formData.dinnerTo },
+    ];
 
-    // Check if from time is before to time for each meal
-    if (formData.breakfastFrom && formData.breakfastTo) {
-      if (!isBefore(formData.breakfastFrom, formData.breakfastTo)) {
-        errors.breakfast = "Breakfast start time must be before end time";
-      }
-    }
-    if (formData.lunchFrom && formData.lunchTo) {
-      if (!isBefore(formData.lunchFrom, formData.lunchTo)) {
-        errors.lunch = "Lunch start time must be before end time";
-      }
-    }
-    if (formData.dinnerFrom && formData.dinnerTo) {
-      if (!isBefore(formData.dinnerFrom, formData.dinnerTo)) {
-        errors.dinner = "Dinner start time must be before end time";
-      }
-    }
+    // Collect valid meal timings
+    mealPeriods.forEach((meal) => {
+      if (meal.from && meal.to) {
+        timings.push({
+          name: meal.name,
+          from: to24h(meal.from),
+          to: to24h(meal.to),
+        });
 
-    // Check for overlaps between different meals
-    for (let i = 0; i < timings.length; i++) {
-      for (let j = i + 1; j < timings.length; j++) {
-        const meal1 = timings[i];
-        const meal2 = timings[j];
+        // Check if from time is before to time
+        if (!isBefore(meal.from, meal.to)) {
+          errors[
+            meal.name.toLowerCase()
+          ] = `${meal.name} start time must be before end time`;
+        }
+      }
+    });
 
-        // Check if timings overlap
+    // Check for overlaps between meals
+    timings.forEach((meal1, i) => {
+      timings.slice(i + 1).forEach((meal2) => {
         if (
           (meal1.from < meal2.to && meal1.to > meal2.from) ||
           (meal2.from < meal1.to && meal2.to > meal1.from)
@@ -300,62 +260,32 @@ const Location = () => {
           errors[meal1.name.toLowerCase()] = errorMsg;
           errors[meal2.name.toLowerCase()] = errorMsg;
         }
-      }
-    }
+      });
+    });
 
-    // Check if meal times are within opening and closing times
-    const opening = convertTo24Hour(formData.openingTime);
-    const closing = convertTo24Hour(formData.closingTime);
+    // Check if meal times are within opening/closing times
+    const opening = to24h(formData.openingTime);
+    const closing = to24h(formData.closingTime);
+
     if (opening && closing) {
-      // For each meal, check from and to are within opening/closing
-      if (
-        formData.breakfastFrom &&
-        (convertTo24Hour(formData.breakfastFrom) < opening ||
-          convertTo24Hour(formData.breakfastFrom) > closing)
-      ) {
-        errors.breakfast =
-          "Breakfast start time must be within opening and closing hours";
-      }
-      if (
-        formData.breakfastTo &&
-        (convertTo24Hour(formData.breakfastTo) < opening ||
-          convertTo24Hour(formData.breakfastTo) > closing)
-      ) {
-        errors.breakfast =
-          "Breakfast end time must be within opening and closing hours";
-      }
-      if (
-        formData.lunchFrom &&
-        (convertTo24Hour(formData.lunchFrom) < opening ||
-          convertTo24Hour(formData.lunchFrom) > closing)
-      ) {
-        errors.lunch =
-          "Lunch start time must be within opening and closing hours";
-      }
-      if (
-        formData.lunchTo &&
-        (convertTo24Hour(formData.lunchTo) < opening ||
-          convertTo24Hour(formData.lunchTo) > closing)
-      ) {
-        errors.lunch =
-          "Lunch end time must be within opening and closing hours";
-      }
-      if (
-        formData.dinnerFrom &&
-        (convertTo24Hour(formData.dinnerFrom) < opening ||
-          convertTo24Hour(formData.dinnerFrom) > closing)
-      ) {
-        errors.dinner =
-          "Dinner start time must be within opening and closing hours";
-      }
-      if (
-        formData.dinnerTo &&
-        (convertTo24Hour(formData.dinnerTo) < opening ||
-          convertTo24Hour(formData.dinnerTo) > closing)
-      ) {
-        errors.dinner =
-          "Dinner end time must be within opening and closing hours";
-      }
+      mealPeriods.forEach((meal) => {
+        if (meal.from) {
+          const mealFromTime = to24h(meal.from);
+          if (mealFromTime < opening || mealFromTime > closing) {
+            errors[
+              meal.name.toLowerCase()
+            ] = `${meal.name} start time must be within opening and closing hours`;
+          }
+        }
+        if (meal.to) {
+          const mealToTime = to24h(meal.to);
+          if (mealToTime < opening || mealToTime > closing) {
+            errors[
+              meal.name.toLowerCase()
+            ] = `${meal.name} end time must be within opening and closing hours`;
+          }
+        }
+      });
     }
 
     setMealTimingErrors(errors);
@@ -435,7 +365,7 @@ const Location = () => {
     setFormData({
       locationName: location.locationName || "",
       address: location.address || "",
-      timeZone: location.timeZone || location.timezone || "",
+      timeZone: location.timeZone || "",
       openingTime: location.openingTime || "",
       closingTime: location.closingTime || "",
       turnOverTime: location.turnOverTime || 30,
@@ -507,22 +437,36 @@ const Location = () => {
       return;
     }
 
-    // Ensure all times are in 24h format for backend
+    // Build mealTimings object
+    const mealTimings = {
+      breakfast: {
+        start: convertTo24Hour(formData.breakfastFrom) || "07:00",
+        end: convertTo24Hour(formData.breakfastTo) || "10:00",
+      },
+      lunch: {
+        start: convertTo24Hour(formData.lunchFrom) || "12:00",
+        end: convertTo24Hour(formData.lunchTo) || "15:00",
+      },
+      dinner: {
+        start: convertTo24Hour(formData.dinnerFrom) || "18:00",
+        end: convertTo24Hour(formData.dinnerTo) || "22:00",
+      },
+    };
+
+    // Build payload according to backend schema
     const payload = {
       locationName: formData.locationName,
       address: formData.address,
       openingTime: convertTo24Hour(formData.openingTime),
       closingTime: convertTo24Hour(formData.closingTime),
-      timeZone: formData.timeZone,
+      timeZone: formData.timeZone || "France/Paris",
       turnOverTime: Number(formData.turnOverTime),
+      smsTemplate: formData.smsTemplate || "New location has been created!",
+      status: "active",
+      tenantId,
+      timeFormatPreference: timeFormat === "12h" ? "12-hour" : "24-hour",
+      mealTimings,
       adminEmail: formData.adminEmail,
-      smsTemplate: formData.smsTemplate,
-      breakfastFrom: convertTo24Hour(formData.breakfastFrom),
-      breakfastTo: convertTo24Hour(formData.breakfastTo),
-      lunchFrom: convertTo24Hour(formData.lunchFrom),
-      lunchTo: convertTo24Hour(formData.lunchTo),
-      dinnerFrom: convertTo24Hour(formData.dinnerFrom),
-      dinnerTo: convertTo24Hour(formData.dinnerTo),
     };
 
     try {
@@ -530,7 +474,6 @@ const Location = () => {
 
       if (editingLocation) {
         const updateApi = new Api(`/api/locations/`);
-
         await updateApi.put(`${editingLocation._id}`, "", payload);
         setLocations((prev) =>
           prev.map((location) =>
@@ -538,7 +481,7 @@ const Location = () => {
               ? {
                   ...location,
                   ...payload,
-                  smsTemplate: formData.smsTemplate,
+                  updatedAt: new Date().toISOString(),
                 }
               : location
           )
@@ -546,19 +489,16 @@ const Location = () => {
         toast.success("Location updated successfully.");
       } else {
         // Create new location
-        const response = await locationApi.post("", payload);
+        const response = await addLocationApi.post("", payload);
         console.log(response);
         const newLocation = response?.location || {
           ...payload,
-          tenantId,
         };
-
         setLocations((prev) => [...prev, newLocation]);
         toast.success("Location added successfully.");
       }
     } catch (err) {
       console.error("Submit error:", err);
-
       if (editingLocation) {
         // Still update UI for edit
         setLocations((prev) =>
@@ -567,7 +507,6 @@ const Location = () => {
               ? {
                   ...location,
                   ...payload,
-                  smsTemplate: formData.smsTemplate,
                   updatedAt: new Date().toISOString(),
                 }
               : location
@@ -626,350 +565,26 @@ const Location = () => {
                     {editingLocation ? "Edit Location" : "Add Location"}
                   </DialogTitle>
                 </DialogHeader>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Time Format Selection */}
-                  <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                    <Label className="text-base font-semibold">
-                      Time Format
-                    </Label>
-                    <RadioGroup
-                      value={timeFormat}
-                      onValueChange={setTimeFormat}
-                      className="flex gap-6"
-                      disabled={isLoading}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="12h"
-                          id="12h"
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor="12h">12 Hour (AM/PM)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="24h"
-                          id="24h"
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor="24h">24 Hour</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Location Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="locationName">Name</Label>
-                    <Input
-                      id="locationName"
-                      name="locationName"
-                      value={formData.locationName}
-                      onChange={handleInputChange}
-                      placeholder="Enter location name"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="Enter full address"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  {/* Admin Email */}
-                  {!editingLocation && (
-                    <div className="space-y-2">
-                      <Label htmlFor="adminEmail">Admin Email</Label>
-                      <Input
-                        id="adminEmail"
-                        name="adminEmail"
-                        type="email"
-                        value={formData.adminEmail}
-                        onChange={handleInputChange}
-                        placeholder="Enter admin email"
-                        required
-                        autoComplete="off"
-                        disabled={isLoading}
-                      />
-                      {isCheckingEmail && (
-                        <div className="text-xs text-muted-foreground">
-                          Checking email...
-                        </div>
-                      )}
-                      {adminEmailError && (
-                        <div
-                          className={`text-xs ${
-                            adminEmailError === "Email Found"
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {adminEmailError}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* SMS Template with Variable Tags */}
-                  <div className="space-y-3">
-                    <Label htmlFor="smsTemplate">SMS Template</Label>
-                    <Textarea
-                      ref={smsTemplateRef}
-                      id="smsTemplate"
-                      name="smsTemplate"
-                      value={formData.smsTemplate}
-                      onChange={handleInputChange}
-                      placeholder="Enter SMS template for this location."
-                      rows={4}
-                      required
-                      disabled={isLoading}
-                      className="resize-none"
-                    />
-
-                    {/* Add Fields Label */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Plus size={16} />
-                      <span className="font-medium">Add Fields</span>
-                    </div>
-
-                    {/* Variable Tags - now rounded and white bg */}
-                    <div className="flex flex-wrap gap-2">
-                      {smsVariables.map((variable, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => insertSmsVariable(variable.value)}
-                          disabled={isLoading}
-                          className="h-8 px-3 py-1 text-xs font-medium rounded-full bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-colors"
-                          tabIndex={0}
-                        >
-                          {variable.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Time Zone */}
-                  <div className="space-y-2">
-                    <Label htmlFor="timeZone">Time Zone</Label>
-                    <Select
-                      value={formData.timeZone}
-                      onValueChange={(value) =>
-                        handleSelectChange("timeZone", value)
-                      }
-                      disabled={isLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Time Zone" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {timezones.map((tz) => (
-                          <SelectItem key={tz.value} value={tz.value}>
-                            {tz.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Opening and Closing Hours */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <CustomTimePicker
-                      label="Opening Hours"
-                      value={formatTimeForDisplay(formData.openingTime)}
-                      onChange={(value) =>
-                        handleTimeChange("openingTime", value)
-                      }
-                      format={timeFormat}
-                      required
-                      disabled={isLoading}
-                    />
-
-                    <CustomTimePicker
-                      label="Closing Hours"
-                      value={formatTimeForDisplay(formData.closingTime)}
-                      onChange={(value) =>
-                        handleTimeChange("closingTime", value)
-                      }
-                      format={timeFormat}
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
-
-                  {/* Meal Timings Section */}
-                  <div className="space-y-4">
-                    <Label className="text-base font-semibold">
-                      Meal Timings (Optional)
-                    </Label>
-
-                    {/* Breakfast Timing */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Breakfast</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CustomTimePicker
-                          label="From"
-                          value={formatTimeForDisplay(formData.breakfastFrom)}
-                          onChange={(value) =>
-                            handleTimeChange("breakfastFrom", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                        <CustomTimePicker
-                          label="To"
-                          value={formatTimeForDisplay(formData.breakfastTo)}
-                          onChange={(value) =>
-                            handleTimeChange("breakfastTo", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {mealTimingErrors.breakfast && (
-                        <div className="text-xs text-red-500">
-                          {mealTimingErrors.breakfast}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Lunch Timing */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Lunch</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CustomTimePicker
-                          label="From"
-                          value={formatTimeForDisplay(formData.lunchFrom)}
-                          onChange={(value) =>
-                            handleTimeChange("lunchFrom", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                        <CustomTimePicker
-                          label="To"
-                          value={formatTimeForDisplay(formData.lunchTo)}
-                          onChange={(value) =>
-                            handleTimeChange("lunchTo", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {mealTimingErrors.lunch && (
-                        <div className="text-xs text-red-500">
-                          {mealTimingErrors.lunch}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Dinner Timing */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Dinner</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CustomTimePicker
-                          label="From"
-                          value={formatTimeForDisplay(formData.dinnerFrom)}
-                          onChange={(value) =>
-                            handleTimeChange("dinnerFrom", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                        <CustomTimePicker
-                          label="To"
-                          value={formatTimeForDisplay(formData.dinnerTo)}
-                          onChange={(value) =>
-                            handleTimeChange("dinnerTo", value)
-                          }
-                          format={timeFormat}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {mealTimingErrors.dinner && (
-                        <div className="text-xs text-red-500">
-                          {mealTimingErrors.dinner}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Turn Over */}
-                  <div className="space-y-3">
-                    <Label>Turn Over</Label>
-                    <RadioGroup
-                      value={String(formData.turnOverTime)}
-                      onValueChange={(value) =>
-                        handleSelectChange("turnOverTime", value)
-                      }
-                      className="flex flex-wrap gap-6"
-                      disabled={isLoading}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="30"
-                          id="30"
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor="30">30 minutes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="60"
-                          id="60"
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor="60">60 minutes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="90"
-                          id="90"
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor="90">90 minutes</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Dialog Actions */}
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleCloseDialog}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={
-                        isLoading ||
-                        (adminEmailError &&
-                          adminEmailError !== "Email Found") ||
-                        isCheckingEmail ||
-                        Object.keys(mealTimingErrors).length > 0
-                      }
-                    >
-                      {isLoading
-                        ? "Processing..."
-                        : editingLocation
-                        ? "Update Location"
-                        : "Add Location"}
-                    </Button>
-                  </div>
-                </form>
+                <LocationForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  timezones={timezones}
+                  timeFormat={timeFormat}
+                  setTimeFormat={setTimeFormat}
+                  isLoading={isLoading}
+                  editingLocation={editingLocation}
+                  adminEmailError={adminEmailError}
+                  isCheckingEmail={isCheckingEmail}
+                  mealTimingErrors={mealTimingErrors}
+                  handleInputChange={handleInputChange}
+                  handleSelectChange={handleSelectChange}
+                  handleTimeChange={handleTimeChange}
+                  handleCloseDialog={handleCloseDialog}
+                  handleSubmit={handleSubmit}
+                  smsVariables={smsVariables}
+                  insertSmsVariable={insertSmsVariable}
+                  smsTemplateRef={smsTemplateRef}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -1050,7 +665,9 @@ const Location = () => {
                       <TableCell className="font-medium">
                         {location.locationName}
                       </TableCell>
-                      <TableCell>{location.address}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {location.address}
+                      </TableCell>
                       <TableCell>
                         {formatTimezoneDisplay(
                           location.timeZone || location.timezone
@@ -1070,6 +687,7 @@ const Location = () => {
                             )
                           : location.closingTime}
                       </TableCell>
+
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button
@@ -1100,40 +718,13 @@ const Location = () => {
           </div>
 
           {/* Delete Confirmation Dialog */}
-          <Dialog
+          <DeleteLocationDialog
             open={isDeleteDialogOpen}
             onOpenChange={setIsDeleteDialogOpen}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Delete Location</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <p>
-                  Are you sure you want to delete this location? This action
-                  cannot be undone.
-                </p>
-              </div>
-              <div className="flex justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={confirmDelete}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Deleting..." : "Delete"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+            isLoading={isLoading}
+            onCancel={() => setIsDeleteDialogOpen(false)}
+            onConfirm={confirmDelete}
+          />
         </CardContent>
       </Card>
     </div>

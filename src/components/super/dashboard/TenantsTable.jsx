@@ -12,10 +12,11 @@ import { UserCircle2Icon } from "lucide-react";
 import superAdminApi from "@/config/superAdminApi";
 import { Badge } from "@/components/ui/badge";
 import { PLAN_COLORS, PLAN_LABELS } from "@/constants/plansData";
-import { usePagination } from "@/hooks/usePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import PaginationControls from "@/components/common/PaginationControls";
+import useSocketEvent from "@/hooks/use-socket-event";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 4;
 
 const TenantsTable = ({ columns = [] }) => {
   const [tenantData, setTenantData] = useState([]);
@@ -32,17 +33,19 @@ const TenantsTable = ({ columns = [] }) => {
     goToPreviousPage,
   } = usePagination(tenantData, ITEMS_PER_PAGE);
 
+  const fetchData = async () => {
+    const response = await superAdminApi.get("/tenants/top-performing");
+    const mappedData =
+      response?.tenantsData?.map((tenant) => ({
+        ...tenant,
+      })) || [];
+    setTenantData(mappedData);
+  };
   useEffect(() => {
-    (async () => {
-      const response = await superAdminApi.get("/tenants/top-performing");
-      const mappedData =
-        response?.tenantsData?.map((tenant) => ({
-          ...tenant,
-        })) || [];
-      setTenantData(mappedData);
-      console.log("response", response);
-    })();
+    fetchData();
   }, []);
+
+  useSocketEvent("plan-bought", fetchData);
 
   return (
     <div className="w-full px-6 py-2">
