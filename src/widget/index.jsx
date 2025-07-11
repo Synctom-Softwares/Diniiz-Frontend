@@ -1,4 +1,4 @@
-import WidgetEntry from './components/reservationwidgets/WidgetEntry';
+import WidgetEntry from '../components/reservationwidgets/WidgetEntry';
 
 // Simple component that matches your working example
 function WidgetContainer({ locationId }) {
