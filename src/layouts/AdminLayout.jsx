@@ -22,7 +22,7 @@ const AdminLayout = () => {
   return (
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar for desktop */}
-        <aside className="hidden md:block w-[200px] bg-white shadow-sm">
+        <aside className="hidden md:block w-[200px] min-w-max bg-white shadow-sm">
           <Sidebar />
         </aside>
 
@@ -66,7 +66,7 @@ const AdminLayout = () => {
         </AnimatePresence>
 
         {/* Main content */}
-        <main className="flex-1 overflow-hidden bg-gray-50">
+        <main className="bg-gray-50">
           <Outlet />
         </main>
       </div>

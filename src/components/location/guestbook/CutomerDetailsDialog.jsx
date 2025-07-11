@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, TriangleAlert } from "lucide-react";
@@ -52,7 +50,7 @@ export function CustomerDetailsDialog({ customer, open, onOpenChange }) {
       userData: { locationId },
     } = useSelector((state) => state.auth);
 
-  const getCustomerApi = new Api(`/api/locations/${locationId}`);
+  const customerApi = new Api(`/api/locations/${locationId}`);
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState({ total: 0, noShow: 0, cancelled: 0 });
   const [loading, setLoading] = useState(false);
@@ -62,7 +60,7 @@ export function CustomerDetailsDialog({ customer, open, onOpenChange }) {
       if (!customer) return;
       setLoading(true);
       try {
-        const res = await getCustomerApi.get(`/customers/${customer}`);
+        const res = await customerApi.get(`/customers/${customer}`);
         console.log(res);
         if (res.success) {
           const c = res.customer;
