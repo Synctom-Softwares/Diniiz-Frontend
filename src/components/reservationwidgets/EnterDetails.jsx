@@ -90,6 +90,7 @@ const EnterDetails = ({ data, update, onNext, onPrevious }) => {
                     onClick={handleToggleNotifyEmail}
                     className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${notifyEmail ? 'bg-amber-50 border border-amber-200' : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'}`}
                 >
+                    
                     <div className="flex items-center">
                         <div className={`p-2 rounded-full ${notifyEmail ? 'bg-amber-100 text-amber-600' : 'bg-gray-200 text-gray-600'}`}>
                             <Mail set="bold" size={20} />
