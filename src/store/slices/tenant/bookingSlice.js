@@ -33,20 +33,10 @@ export const getAllbookings = createAsyncThunk(
             tenantApi.get(`/${tenantId}/reservations?${queryParams.toString()}`)
         );
 
+        // console.log('data.reservations', data.reservations)
+
         if (error) return rejectWithValue(error);
-        return {
-            reservations: data.reservations?.map(r => ({
-                _id: r._id,
-                customerName: r.customer?.customerName,
-                locationId: r.locationId,
-                customerType: r.customer?.customerType || "New",
-                date: new Date(r.date).toLocaleDateString(),
-                time: r.time,
-                table: r.tableId,
-                source: r.source,
-                action: null
-            }))
-        };
+        return data;
     }
 );
 
@@ -75,11 +65,11 @@ export const createBooking = createAsyncThunk(
     }
 );
 
-export const editTenant = createAsyncThunk(
+export const editBooking = createAsyncThunk(
     "tenants/editTenant",
-    async (payload, id, { rejectWithValue }) => {
+    async ({id, payload}, { rejectWithValue }) => {
         const { data, error } = await asyncHandler(() =>
-            tenantApi.put('/tenant', payload) //TODO: change route
+            reservationApi.put(`/${id}`, "", payload) 
         );
 
         if (error) return rejectWithValue(error);
@@ -154,21 +144,30 @@ const bookingSlice = createSlice({
             .addCase(getAllbookings.fulfilled, (state, action) => {
                 state.loading = false;
                 state.status = true;
-                state.allBookings = action.payload.reservations?.map((booking) => ({
-                    bookingId: booking._id,
-                    locationId: booking.locationId,
-                    customerName: booking.customerName,
-                    customerType: booking.customerType || "New",
-                    date: new Date(booking.date).toLocaleDateString(),
-                    time: booking.time,
-                    table: booking.tableNumber || booking.table,
-                    source: booking.source
-                }));;
+                state.allBookings = action.payload.reservations?.map((r) => ({
+                    bookingId: r._id,
+                    customerName: r.customer?.customerName,
+                    locationId: r.locationId,
+                    customerType: r.customer?.customerType || "New",
+                    date: new Date(r.date).toLocaleDateString(),
+                    time: r.time,
+                    table: r.tableId,
+                    source: r.source,
+                    email: r.customer?.customerEmail,
+                    phone: r.customer?.customerPhone,
+                    zipCode: r.customer?.customerZipCode,
+                    allergies: r.allergies,
+                    partySize: r.partySize,
+                    specialRequests: r.specialRequests,
+                    status: r.status,
+                    tableId: r.tableId,
+                    tenantId: r.tenantId
+                }));
 
             })
             .addCase(getAllbookings.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || { message: "Fetching reservation failed" };
+                state.error = action.payload.payload || "Fetching reservation failed";
             })
             //create booking
             .addCase(createBooking.pending, (state) => {
@@ -183,7 +182,7 @@ const bookingSlice = createSlice({
             })
             .addCase(createBooking.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || { message: "Creating reservation failed" };
+                state.error = action.payload.message ||  "Creating reservation failed" ;
             })
 
             //get tables
@@ -199,7 +198,7 @@ const bookingSlice = createSlice({
             })
             .addCase(getTables.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || { message: "Fetching Tables failed" };
+                state.error = action.payload?.message ||  "Fetching Tables failed" ;
             })
 
     },

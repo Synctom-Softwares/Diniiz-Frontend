@@ -60,6 +60,8 @@ const AddTenantForm = ({ isOpen, onClose, label, fetchTenants, initialData }) =>
                 amount: isEnterprisePlan ? formData.customAmount : undefined
             }));
 
+            console.log('response', response)
+
             if (response.payload?.success) {
                 toast({
                     title: response.payload.message,

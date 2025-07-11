@@ -18,7 +18,7 @@ const ReservationWidgetModal = ({ isOpen, onClose, children }) => {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 80, opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="z-50 bg-white rounded-3xl w-full max-w-sm  min-h-[32rem] mx-4 p-6 absolute bottom-21 right-5"
+                        className="z-50 bg-white rounded-3xl w-full max-w-xs sm:max-w-sm  min-h-[32rem] mx-4 p-6 absolute bottom-21 right-5"
                     >
                         <button
                             onClick={onClose}

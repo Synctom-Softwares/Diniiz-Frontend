@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { InfinityIcon, X } from 'lucide-react';
 import Input from '../../common/Input';
 import MainButton from '../../common/buttons/MainButton';
 import DropdownSelect from '../../common/DropdownSelect';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '../../common/toast/useToast';
 import { getLocations } from '../../../store/slices/tenant/locationSlice';
-import { getTables, createBooking } from '../../../store/slices/tenant/bookingSlice';
+import { getTables, createBooking, editBooking } from '../../../store/slices/tenant/bookingSlice';
 import { createReservation } from '../../../store/slices/location/reservationSlice';
 
 const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, isTenantAdmin = false }) => {
@@ -18,6 +18,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         partySize: '',
         zipCode: '',
         source: '',
+        tableId: '',
         date: '',
         time: '',
         allergies: '',
@@ -25,9 +26,11 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         note: ''
     });
 
-    const [selectedLocation, setSelectedLocation] = useState(null);
-    const [selectedTableNumber, setSelectedTableNumber] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState({});
+    const [selectedTableNumber, setSelectedTableNumber] = useState({});
     const [errors, setErrors] = useState({});
+
+    const [loading, setLoading] = useState(false)
 
     const dispatch = useDispatch();
     const { toast } = useToast();
@@ -68,25 +71,6 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         }
     }, [dispatch, userData.tenantId, isTenantAdmin, fetchLocations, userLocationId]);
 
-    useEffect(() => {
-        const locationId = isTenantAdmin ? selectedLocation?.id : userLocationId;
-
-        const fetchTables = async () => {
-            if (locationId && formData.partySize && formData.date && formData.time) {
-                const response = await dispatch(getTables({
-                    locationId: locationId,
-                    body: {
-                        partySize: formData.partySize,
-                        date: formData.date,
-                        time: formData.time
-                    }
-                }));
-
-                console.log('response', response)
-            }
-        }
-        fetchTables();
-    }, [selectedLocation, formData.partySize, formData.date, formData.time, dispatch, isTenantAdmin, userLocationId]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -98,6 +82,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('formData', formData)
 
         // Validate required fields
         const newErrors = {};
@@ -108,54 +93,101 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         if (!formData.zipCode) newErrors.zipCode = 'Zip Code is required';
         if (!formData.source) newErrors.source = 'Source is required';
         if (!selectedLocation) newErrors.location = 'Location is required';
-        if (!selectedTableNumber) newErrors.table = 'Table is required';
-        console.log('formData', formData)
+        if (!selectedTableNumber.value) newErrors.table = 'Table is required';
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
+        setLoading(true)
 
         try {
-            console.log('formData', formData)
+
             let response;
-            if (isTenantAdmin) {
-                response = await dispatch(createBooking(
-                    {
-                        locationId: selectedLocation.id,
-                        tableId: selectedTableNumber.id,
-                        body: {
-                            ...formData,
-                        }
+            if (label === "Edit Booking") {
+                console.log('formData', formData)
+                // Edit booking flow
+                response = await dispatch(editBooking({
+                    id: initialData.bookingId,
+                    payload: {
+                        ...formData,
+                        tableId: selectedTableNumber?.value
                     }
-                ));
+                }));
             } else {
-                response = await dispatch(createReservation(
-                    {
-                        locationId: selectedLocation?.id,
-                        tableId: selectedTableNumber?.id,
-                        body: {
-                            ...formData,
+                // Create booking flow (existing code)
+                if (isTenantAdmin) {
+                    response = await dispatch(createBooking(
+                        {
+                            locationId: selectedLocation.id,
+                            tableId: selectedTableNumber.id,
+                            body: {
+                                ...formData,
+                            }
                         }
-                    }
-                ));
+                    ));
+                } else {
+                    response = await dispatch(createReservation(
+                        {
+                            locationId: selectedLocation?.id,
+                            tableId: initialData?.table,
+                            body: {
+                                ...formData,
+                            }
+                        }
+                    ));
+                }
             }
 
-            console.log('response', response)
-
-            if (response.payload?.success === true) {
-                toast({ title: response.payload.message, variant: 'success' });
+            // Handle the response properly
+            const payload = response?.payload;
+            if (payload?.success) {
+                toast({
+                    title: payload.message ||
+                        (label === "Edit Booking"
+                            ? 'Booking updated successfully'
+                            : 'Booking created successfully'),
+                    variant: 'success'
+                });
                 onClose();
                 resetForm();
                 fetchBookings();
             } else {
-                toast({ title: response.payload?.message || 'Failed to create booking', variant: 'destructive' });
+                toast({
+                    title: payload?.message ||
+                        (label === "Edit Booking"
+                            ? 'Failed to update booking'
+                            : 'Failed to create booking'),
+                    variant: 'destructive'
+                });
             }
-
         } catch (error) {
-            toast({ title: 'An error occurred while creating reservation', variant: 'destructive' });
+            toast({
+                title: label === "Edit Booking"
+                    ? 'An error occurred while updating booking'
+                    : 'An error occurred while creating reservation',
+                variant: 'destructive'
+            });
             console.error('Booking submission error:', error);
+        } finally {
+            setLoading(false)
         }
+    };
+
+    const handleTableDropdownClick = () => {
+        if (!selectedLocation) {
+            toast({ title: 'Please select location first', variant: 'destructive' });
+            return false;
+        }
+        if (!formData.partySize) {
+            toast({ title: 'Please select party size first', variant: 'destructive' });
+            return false;
+        }
+        if (!formData.date) {
+            toast({ title: 'Please select date first', variant: 'destructive' });
+            return false;
+        }
+        if (!formData.time) {
+            toast({ title: 'Please select time first', variant: 'destructive' });
+            return false;
+        }
+        return true;
     };
 
     const resetForm = () => {
@@ -172,8 +204,8 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
             specialRequest: '',
             note: ''
         });
-        setSelectedLocation(null);
-        setSelectedTableNumber(null);
+        setSelectedLocation({});
+        setSelectedTableNumber({});
         setErrors({});
     };
 
@@ -190,30 +222,78 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
         value: num
     }));
 
-    const sourceOptions = ["Website", "Walk-in", "Phone", "App", "Other"].map(opt => ({
+    const sourceOptions = ["Walk-in", "Reserved"].map(opt => ({
         id: opt.toLowerCase(),
         label: opt,
         value: opt.toLowerCase()
     }));
 
     console.log('initialData', initialData)
+    console.log('location', userLocationId)
+    console.log('locations', locations)
+
     useEffect(() => {
-        if (initialData){
-        setFormData({
-            customerName: initialData.customerName,
-            email: initialData.customer?.customerEmail,
-            phone: initialData.customerPhone,
-            partySize: initialData.partySize,
-            zipCode: initialData.customer?.customerZipCode,
-            source: initialData.source,
-            date: initialData.date,
-            time: initialData.time,
-            allergies: initialData.customer?.customerallergies,
-            specialRequest: initialData.specialRequests,
-            note: initialData.note
-        });
-    }
-    }, [initialData])
+        if (initialData) {
+
+            // console.log('initialData in useefe', initialData)
+            setFormData({
+                customerName: initialData.customerName || '',
+                email: initialData.email || '',
+                phone: initialData.phone || '',
+                partySize: initialData.partySize || '',
+                zipCode: initialData.zipCode || '',
+                source: initialData.source || '',
+                date: initialData.date?.slice(0, 10),
+                time: initialData.time || '',
+                allergies: initialData.allergies || '',
+                specialRequest: initialData.specialRequests || '',
+                note: initialData.note || ''
+            });
+
+            if (locations && locations.length > 0) {
+                const matchingLocation = locations.find((loc) => loc._id === initialData.locationId);
+                if (matchingLocation) {
+                    setSelectedLocation({
+                        id: matchingLocation._id,
+                        label: matchingLocation.locationName,
+                        value: matchingLocation._id
+                    });
+                }
+            }
+
+            setSelectedTableNumber({
+                id: initialData.tableId,
+                label: initialData.table,
+                value: initialData.tableId
+            });
+
+        }
+    }, [initialData, locations])
+
+    useEffect(() => {
+        const locationId = isTenantAdmin ? selectedLocation?.id : userLocationId;
+
+        const fetchTables = async () => {
+            console.log('Tables req:', (locationId));
+            if (locationId && formData.partySize && formData.date && formData.time) {
+                try {
+
+                    const response = await dispatch(getTables({
+                        locationId: locationId,
+                        body: {
+                            partySize: formData.partySize,
+                            date: formData.date,
+                            time: formData.time
+                        }
+                    }));
+                } catch (error) {
+                    console.error('Error fetching tables:', error);
+                }
+            }
+        };
+
+        fetchTables();
+    }, [selectedLocation, formData.partySize, formData.date, formData.time, dispatch, isTenantAdmin, userLocationId]);
 
     if (!isOpen) return null;
 
@@ -241,7 +321,14 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e);
+                }} onClick={(e) => {
+                    if (e.target.type !== 'submit') {
+                        e.preventDefault();
+                    }
+                }} className="space-y-3">
                     {/* Full Name */}
                     <div className='flex w-full items-center'>
                         <label className="w-2/8 text-left text-sm text-textSecondary font-medium mb-1">Name</label>
@@ -249,6 +336,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                             className="w-6/8 py-1.5 text-xs"
                             placeholder="Enter customer full name"
                             name="customerName"
+                            disabled={label === "Edit Booking"}
                             value={formData.customerName}
                             onChange={handleInputChange}
                         />
@@ -260,6 +348,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                             className="w-6/8 py-1.5 text-xs"
                             placeholder="Enter your phone number"
                             name="phone"
+                            disabled={label === "Edit Booking"}
                             value={formData.phone}
                             onChange={handleInputChange}
                         />
@@ -272,6 +361,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                             className="w-6/8 py-1.5 text-xs"
                             placeholder="Enter your email"
                             name="email"
+                            disabled={label === "Edit Booking"}
                             value={formData.email}
                             onChange={handleInputChange}
                         />
@@ -286,6 +376,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                                 <DropdownSelect
                                     label="Select"
                                     options={locationOptions}
+
                                     selected={selectedLocation?.label}
                                     onChange={(opt) => {
                                         setSelectedLocation(opt);
@@ -315,7 +406,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                     <div className="flex items-center justify-center w-full gap-2">
                         <div className="flex items-center justify-center w-1/2">
                             <label className="w-2/6 text-left text-sm text-textSecondary font-medium mb-1">Date</label>
-                            <input
+                            <Input
                                 type="date"
                                 className="w-4/6 rounded-xl text-xs border border-gray-400 px-1 py-2"
                                 name="date"
@@ -326,7 +417,7 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
 
                         <div className="flex items-center justify-center w-1/2">
                             <label className="w-2/6 text-left text-sm text-textSecondary font-medium mb-1">Time</label>
-                            <input
+                            <Input
                                 type="time"
                                 className="w-4/6 text-xs border border-gray-400 px-1 py-2 rounded-xl"
                                 name="time"
@@ -344,11 +435,21 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                                 label="Select Table"
                                 options={availableTables}
                                 selected={selectedTableNumber?.label}
-                                onChange={(opt) => {
+                                onChange={(opt, e) => {
+                                    e?.stopPropagation();
                                     setSelectedTableNumber(opt);
                                     setErrors(prev => ({ ...prev, table: undefined }));
                                 }}
+                                onToggle={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (!selectedLocation || !formData.partySize || !formData.date || !formData.time) {
+                                        handleTableDropdownClick();
+                                    }
+                                }}
+                                disabled={!selectedLocation || !formData.partySize || !formData.date || !formData.time}
                             />
+
                         </div>
 
                         {/* Zip Code */}
@@ -369,9 +470,17 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                             label="Select Source"
                             options={sourceOptions}
                             selected={formData.source}
-                            onChange={(opt) => {
+                            onChange={(opt, e) => {
+                                e?.stopPropagation();
                                 setFormData(prev => ({ ...prev, source: opt.value }));
                                 setErrors(prev => ({ ...prev, source: undefined }));
+                            }}
+                            onToggle={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!selectedLocation || !formData.partySize || !formData.date || !formData.time) {
+                                    handleTableDropdownClick();
+                                }
                             }}
                         />
                     </div>
@@ -419,13 +528,12 @@ const AddBookingForm = ({ isOpen, onClose, label, initialData, fetchBookings, is
                             type="submit"
                             className="px-3"
                             radius='rounded-xl'
-                            onClick={() => {
-                                if (errors) {
-                                    toast({ title: 'Please fill all required fields', variant: 'destructive' });
-                                }
-                            }}
+
                         >
-                            Save
+                            {loading ? <div className="flex items-center gap-2">
+                                <span className="loader w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                                Loading...
+                            </div> : 'Save'}
                         </MainButton>
                     </div>
                 </form>
