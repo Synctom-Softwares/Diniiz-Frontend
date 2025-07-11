@@ -2,15 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  EyeOff,
-  Mail,
-  Lock,
-  Phone,
-  User2,
-  Edit,
-  Eye,
-} from "lucide-react";
+import { EyeOff, Mail, Lock, Phone, User2, Edit, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -36,7 +28,6 @@ const Settings = () => {
   const [tenantData, setTenantData] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [avatar, setAvatar] = useState(null);
   const [formData, setFormData] = useState({
@@ -44,21 +35,15 @@ const Settings = () => {
     lastName: "",
     email: "",
     phone: "",
-    currentPassword: "",
-    newPassword: "",
   });
   const [planType, setPlanType] = useState("basic");
   const [billingType, setBillingType] = useState("monthly");
   const [unsubscribePassword, setUnsubscribePassword] = useState("");
   const fileInputRef = useRef(null);
 
-  // Initialize API instance
   const tenantApi = new Api("/api/tenants");
 
-  // Get tenant ID from localStorage
   const tenantId = userData.tenantId;
-  console.log(tenantId);
-  // Fetch tenant data
   const fetchTenantData = async () => {
     try {
       setLoading(true);
@@ -85,8 +70,6 @@ const Settings = () => {
             "",
           email: data.email || "",
           phone: data.phone || "",
-          currentPassword: "",
-          newPassword: "",
         });
       } else {
         toast({
@@ -127,12 +110,6 @@ const Settings = () => {
         phone: formData.phone,
       };
 
-      // Only include password if both current and new passwords are provided
-      if (formData.currentPassword && formData.newPassword) {
-        updateData.currentPassword = formData.currentPassword;
-        updateData.newPassword = formData.newPassword;
-      }
-
       // Include avatar if changed
       if (avatar && avatar !== tenantData.avatar) {
         updateData.avatar = avatar;
@@ -152,8 +129,6 @@ const Settings = () => {
         // Clear password fields
         setFormData((prev) => ({
           ...prev,
-          currentPassword: "",
-          newPassword: "",
         }));
       } else {
         toast({
@@ -207,8 +182,6 @@ const Settings = () => {
       lastName: tenantData.lastName || "",
       email: tenantData.email || "",
       phone: tenantData.phone || "",
-      currentPassword: "",
-      newPassword: "",
     });
     setAvatar(tenantData.avatar || null);
   };
@@ -218,23 +191,15 @@ const Settings = () => {
     fetchTenantData();
   }, []);
 
-  if (loading) {
-    return (
-      <Card className="max-w-5xl mx-auto rounded-2xl p-4 md:p-8 bg-white shadow-xs">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading...</div>
-        </div>
-      </Card>
-    );
-  }
-
   return (
     <Layout title="Settings">
       <Card className="max-w-5xl mx-auto rounded-2xl p-4 md:p-8 bg-white shadow-xs">
         <div className="flex justify-start mb-4">
           <Button
             variant={isEditing ? "destructive" : "outline"}
-            onClick={() => (isEditing ? handleCancelEdit() : setIsEditing(true))}
+            onClick={() =>
+              isEditing ? handleCancelEdit() : setIsEditing(true)
+            }
             className="flex items-center gap-2"
           >
             <Edit className="h-4 w-4" />
@@ -296,7 +261,9 @@ const Settings = () => {
 
               {/* Last Name */}
               <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm">Last Name</Label>
+                <Label className="text-muted-foreground text-sm">
+                  Last Name
+                </Label>
                 <div className="inline-flex items-center gap-2 bg-input px-3 py-2 rounded-lg w-full">
                   <User2 className="text-muted-foreground h-4 w-4 flex-shrink-0" />
                   <Input
@@ -344,7 +311,7 @@ const Settings = () => {
               </div>
 
               {/* Current Password */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label className="text-muted-foreground text-sm">
                   Current Password
                 </Label>
@@ -377,7 +344,7 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* New Password */}
+              {/* New Password
               <div className="space-y-2">
                 <Label className="text-muted-foreground text-sm">
                   New Password
@@ -409,7 +376,7 @@ const Settings = () => {
                     />
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Save Button */}

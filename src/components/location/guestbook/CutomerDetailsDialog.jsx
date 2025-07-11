@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText } from "lucide-react";
+import { FileText, TriangleAlert } from "lucide-react";
 import {
   Tooltip,
   TooltipTrigger,
@@ -137,32 +137,6 @@ export function CustomerDetailsDialog({ customer, open, onOpenChange }) {
               </div>
             </div>
 
-            {/* Notes and Allergies */}
-            <div className="grid sm:grid-cols-2 *:space-y-2 gap-4">
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
-                  rows={3}
-                  placeholder="Enter customer notes..."
-                />
-              </div>
-              <div>
-                <Label htmlFor="allergies">Allergies</Label>
-                <Textarea
-                  id="allergies"
-                  value={formData.allergies}
-                  onChange={(e) =>
-                    handleInputChange("allergies", e.target.value)
-                  }
-                  rows={3}
-                  placeholder="Enter customer allergies..."
-                />
-              </div>
-            </div>
-
             {/* History Section */}
             <div>
               <h3 className="text-lg font-semibold mb-3">History</h3>
@@ -228,11 +202,7 @@ export function CustomerDetailsDialog({ customer, open, onOpenChange }) {
                                       e.stopPropagation();
                                     }}
                                   >
-                                    <img
-                                      src="/virus.svg"
-                                      alt="allergies"
-                                      className="size-full"
-                                    />
+                                    <TriangleAlert className="text-amber-400 size-6" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>

@@ -1,11 +1,7 @@
-import React, { useState } from 'react'
 import Layout from '@/components/common/Layout'
 import Updates from '@/components/tenant/dashboard/Updates'
-import { dummyUpdates } from '@/constants/dashboardDummyData'
 import { Badge } from '@/components/ui/badge'
-import { useSelector } from 'react-redux'
 import GenericTable from '@/components/common/GenericTable'
-import { toast } from 'react-toastify'
 
 // Dummy data for staff reservations (similar to Booking.jsx)
 const dummyStaffReservations = [
@@ -102,8 +98,8 @@ function Dashboard() {
             data={dummyStaffReservations}
           />
         </div>
-        <div className="md:col-span-2">
-          <Updates updates={dummyUpdates} />
+        <div className="md:col-span-2 bg-white border">
+          <Updates />
         </div>
       </div>
     </Layout>

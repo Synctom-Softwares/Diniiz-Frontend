@@ -43,7 +43,7 @@ export function SearchAndFilters({
         </Select>
       </div>
 
-      <div className="relative flex-1 max-w-2x">
+      <div className="relative flex-1 max-w-2xs">
         <Input
           placeholder="Search"
           value={searchTerm}

@@ -1,20 +1,9 @@
 import { useEffect, useState } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import axios from "axios";
 import { Loader2 } from "lucide-react";
-
-const PLAN_COLORS = {
-  pro: "#2196F3",
-  enterprise: "#9C27B0",
-  premium: "#FFC107",
-};
-
-const PLAN_LABELS = {
-  pro: "Pro",
-  enterprise: "Enterprise",
-  premium: "Premium",
-};
+import superAdminApi from "@/config/superAdminApi";
+import { PLAN_COLORS, PLAN_LABELS } from "@/constants/plansData";
 
 const chartConfig = {
   users: {
@@ -32,6 +21,10 @@ const chartConfig = {
     label: "Premium Plan",
     color: "#FFC107",
   },
+  starter: {
+    label: "Starter Plan",
+    color: "#4CAF50",
+  },
 };
 
 const PlanDistributionChart = () => {
@@ -39,15 +32,16 @@ const PlanDistributionChart = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("/api/superadmin/plan-distribution")
+    superAdminApi
+      .get("/plans/buyer-percentage")
       .then((res) => {
-        const apiPercentages = res.data?.percentages || {};
+        const apiPercentages = res?.percentages || {};
+        console.log(apiPercentages)
 
         // Convert percentages to numbers and build chart data
         const data = Object.entries(apiPercentages).map(([type, percent]) => ({
           type,
-          percent: parseFloat(percent.replace("%", "")),
+          percent: parseFloat(percent),
           fill: PLAN_COLORS[type] || "#8884d8",
         }));
         setChartData(data);
@@ -55,9 +49,10 @@ const PlanDistributionChart = () => {
       .catch(() => {
         // fallback to dummy data if API fails
         const fallback = [
-          { type: "pro", percent: 12.5, fill: PLAN_COLORS.pro },
-          { type: "enterprise", percent: 25.0, fill: PLAN_COLORS.enterprise },
-          { type: "premium", percent: 62.5, fill: PLAN_COLORS.premium },
+          { type: "pro", percent: 12.50, fill: PLAN_COLORS.pro },
+          { type: "enterprise", percent: 25.00, fill: PLAN_COLORS.enterprise },
+          { type: "premium", percent: 62.50, fill: PLAN_COLORS.premium },
+          { type: "starter", percent: 0.00, fill: PLAN_COLORS.starter },
         ];
         setChartData(fallback);
       })
@@ -67,7 +62,10 @@ const PlanDistributionChart = () => {
   if (loading) return <Loader2 size={20} className="animate-spin" />;
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-around">
+    <div className="h-full w-full flex flex-col items-center justify-around pb-4">
+      <h2 className="py-4 align-self-end font-semibold text-black/70">
+        Plan Distribution
+      </h2>
       <ChartContainer
         config={chartConfig}
         className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0 h-full w-full"
@@ -119,9 +117,6 @@ const PlanDistributionChart = () => {
           </div>
         ))}
       </div>
-      <h2 className="py-4 align-self-end font-semibold text-black/70">
-        Plan Distribution
-      </h2>
     </div>
   );
 };

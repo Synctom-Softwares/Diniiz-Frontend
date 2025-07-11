@@ -9,7 +9,7 @@ const formatter = Intl.DateTimeFormat("en", {
 
 const Updates = () => {
   const { notifications } = useNotifications({
-    role: "user"
+    role: "staff"
   });
 
   return (
@@ -17,11 +17,6 @@ const Updates = () => {
       <h2 className="pb-2 text-black/70 font-semibold text-center">
         Recent Updates
       </h2>
-      {notifications.length === 0 && (
-        <div className="h-full flex items-center justify-center text-lg text-muted-foreground">
-          No Recent Notifications
-        </div>
-      )}
       {notifications.length > 0 && (
         <ScrollArea className="h-74 md:h-full">
           <div className="grid gap-0.5">
@@ -39,6 +34,10 @@ const Updates = () => {
                     {formatter.format(Date.parse(notification?.createdAt))}
                   </p>
                 </div>
+
+                {/* {notification?.isRead == false && (
+                  <div className="absolute top-1 right-1 size-3 bg-primary rounded-full" />
+                )} */}
               </div>
             ))}
           </div>

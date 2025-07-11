@@ -39,10 +39,6 @@ const AddStaffDialog = ({ open, onClose, onAdd }) => {
     setSubmitting(true);
     setError(null);
     try {
-      // const res = await locationApi.post(`/${locationId}/staff`, {
-      //   name: form.staffName,
-      //   password: form.password,
-      // });
       const res = await onAdd(form.staffName, form.password);
       if (res?.success) {
         toast.success(res?.message || "Staff added successfully.");

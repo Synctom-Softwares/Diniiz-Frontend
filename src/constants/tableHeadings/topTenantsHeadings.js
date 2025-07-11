@@ -6,6 +6,7 @@ export const topTenantsColumns = [
     },
     { key: "plan", label: "Plan" },
     { key: "totalBookings", label: "Total Bookings" },
-    { key: "topLocation", label: "Location" },
     { key: "totalStaff", label: "Staff" },
+    {key: "totalSpent", label: "Total Spent"},
+    {key: "clientSpend", label: "Client Spend(?)"}
 ];
