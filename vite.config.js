@@ -5,15 +5,6 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://diniiz-backend.onrender.com/",
-        changeOrigin: true,
-        secure: false,
-      },
-    }
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -24,4 +15,3 @@ export default defineConfig({
     emptyOutDir: true
   }
 })
-
