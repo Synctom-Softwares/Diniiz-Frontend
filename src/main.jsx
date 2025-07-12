@@ -22,7 +22,6 @@ import AdminLayout from '../src/layouts/AdminLayout.jsx'
 import WidgetEntry from '../src/components/reservationwidgets/WidgetEntry.jsx'
 
 import { ToastContainer } from 'react-toastify'
-import WidgetTestPage from './testWidget/WidgetTestPage.jsx'
 import { Toaster } from "../src/components/common/toast/Toaster.jsx";
 import SuccessPage from "../src/pages/payment/SuccessPage.jsx";
 import FailurePage from "../src/pages/payment/FailurePage.jsx";
