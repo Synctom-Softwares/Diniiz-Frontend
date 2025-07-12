@@ -22,24 +22,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    lib: {
-      entry: './src/widget/index.jsx',
-      name: 'DiniizWidget',
-      formats: ['umd'],
-      fileName: () => 'widget.bundle.js',
-    },
-    rollupOptions: {
-      external: ['react', 'react-dom'],
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
-      },
-    },
-    outDir: 'dist/widget',
-    emptyOutDir: true,
-  },
+  
 
 })

@@ -6,9 +6,9 @@ const locationApi = new Api('/api/locations')
 export const getAvailableTables = async (locationId, body) => {
   // console.log('location, body', location, body)
   try {
-    const response = await locationApi.post(`/${locationId}/tables/freeTimes`, body);
-    // if (response) console.log('response', response)
-    if (response) console.log('response', response)
+    const response = await locationApi.post(`/${locationId}/tables/freeMealTimes`, body);
+    if (response) console.log('response', JSON.stringify(response)
+    )
     return response
   } catch (error) {
     console.log('error', error)
