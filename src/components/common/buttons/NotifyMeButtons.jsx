@@ -1,7 +1,7 @@
 
 import { Bell, BellOff } from "lucide-react";
 
-const NotifyMeButton = ({ isEnabled, onToggle }) => {
+const NotifyMeButton = ({ isEnabled, onToggle, label }) => {
   return (
     <button
       onClick={onToggle}
@@ -10,7 +10,7 @@ const NotifyMeButton = ({ isEnabled, onToggle }) => {
       }`}
     >
       {isEnabled ? <Bell size={16}/> : <BellOff size={16}/>}
-      Notify Me
+      {label}
     </button>
   );
 };

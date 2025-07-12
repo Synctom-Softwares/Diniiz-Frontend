@@ -43,7 +43,7 @@ const formatTime = (time, is12Hour) => {
 
 const FindTable = ({ data, update, onContinue, locationId }) => {
   const [showTimeSelection, setShowTimeSelection] = useState(false);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [freeTimes, setFreeTimes] = useState({ breakfast: [], lunch: [], dinner: [] });
   const [loading, setLoading] = useState(false);
   const [selectedTime, setSelectedTime] = useState("");
   const [error, setError] = useState("");
@@ -56,42 +56,21 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
       return;
     }
 
-    setAvailableTimeSlots([
-        '10:00',
-        '10:30',
-        '11:00',
-        '11:30',
-        '12:00',
-        '12:30',
-        '13:00',
-        '13:30',
-        '14:00',
-        '14:30',
-        '15:00',
-        '15:30',
-        '16:00',
-        '16:30',
-        '17:00',
-        '17:30'
-    ])
-    setShowTimeSelection(true)
-
     setError("");
     setLoading(true);
     
     try {
-    //   const response = await getAvailableTables(locationId, {
-    //     partySize: data.people,
-    //     date: data.date,
-    //     mealType: selectedMeal // Pass meal type to API
-    //   });
+      const response = await getAvailableTables(locationId, {
+        partySize: data.people,
+        date: data.date,
+      });
       
-    //   if (response.success) {
-    //     setAvailableTimeSlots(response.tableAvailableTime || []);
-    //     setShowTimeSelection(true);
-    //   } else {
-    //     setError(response.message || "Could not fetch tables.");
-    //   }
+      if (response.success) {
+        setFreeTimes(response.freeTimes || { breakfast: [], lunch: [], dinner: [] });
+        setShowTimeSelection(true);
+      } else {
+        setError(response.message || "Could not fetch tables.");
+      }
     } catch (err) {
       setError("Failed to fetch available tables.");
     } finally {
@@ -107,25 +86,15 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
   const handleMealSelect = (mealId) => {
     setSelectedMeal(mealId);
     setSelectedTime("");
-    // You might want to refetch times when meal type changes
-    // handleSearch();
   };
 
-  // Filter times based on selected meal type
-  const getFilteredTimes = () => {
-    const currentMeal = MEAL_TYPES.find(m => m.id === selectedMeal);
-    if (!currentMeal) return availableTimeSlots;
-    
-    return availableTimeSlots.filter(time => {
-      const [hour] = time.split(':');
-      const hourNum = parseInt(hour, 10);
-      const [start, end] = currentMeal.timeRange.map(t => parseInt(t.split(':')[0], 10));
-      return hourNum >= start && hourNum < end;
-    });
+  // Get times for the selected meal type
+  const getCurrentMealTimes = () => {
+    return freeTimes[selectedMeal] || [];
   };
 
   return (
-    <div className=" w-full max-h-80 overflow-y-auto overflow-x-hidden scrollbar-none">
+    <div className="w-full max-h-80 overflow-y-auto overflow-x-hidden scrollbar-none">
       {/* Input Section */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
@@ -178,12 +147,11 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
         <motion.div 
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
-          duration={{time: 500}}
           className="pt-1 pb-3"
         >
           <MainButton 
             onClick={handleSearch}
-            className=" py-2 rounded-xl bg-widgetColor text-white font-medium shadow-md hover:shadow-widgetColor/50 "
+            className="py-2 rounded-xl bg-widgetColor text-white font-medium shadow-md hover:shadow-widgetColor/50"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
@@ -204,7 +172,7 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className=" space-y-3 overflow-hidden"
+            className="space-y-3 overflow-hidden"
           >
             {/* Meal Type Selector */}
             <motion.div 
@@ -213,7 +181,7 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
               transition={{ delay: 0.2 }}
               className="space-y-3"
             >
-                <hr />
+              <hr />
               <div className="flex gap-3">
                 {MEAL_TYPES.map((meal) => (
                   <motion.button
@@ -229,6 +197,11 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
                   >
                     {meal.icon}
                     <span className="font-medium">{meal.label}</span>
+                    {freeTimes[meal.id]?.length > 0 && (
+                      <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                        {freeTimes[meal.id].length}
+                      </span>
+                    )}
                   </motion.button>
                 ))}
               </div>
@@ -242,7 +215,10 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
               className="space-y-3"
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-sm sm:text-lg font-medium text-gray-800">Available Time Slots</h3>
+                <h3 className="text-sm sm:text-lg font-medium text-gray-800">
+                  Available Time Slots
+                  {getCurrentMealTimes().length === 0 && " - None available"}
+                </h3>
                 <button 
                   onClick={() => setIs12Hour(!is12Hour)}
                   className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
@@ -253,7 +229,7 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
               </div>
               
               <div className="grid grid-cols-4 gap-3">
-                {getFilteredTimes().map((time) => (
+                {getCurrentMealTimes().map((time) => (
                   <motion.button
                     key={time}
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -262,7 +238,7 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSelectTime(time)}
-                    className={`p-2 rounded-lg border transition-all text-xs  ${
+                    className={`p-2 rounded-lg border transition-all text-xs ${
                       selectedTime === time
                         ? "bg-widgetColor text-white shadow-lg"
                         : "bg-white border-gray-200 hover:border-widgetColor/30 hover:bg-widgetColor/10"
@@ -286,7 +262,7 @@ const FindTable = ({ data, update, onContinue, locationId }) => {
               >
                 <MainButton 
                   onClick={onContinue}
-                  className=" py-3 rounded-xl bg-widgetColor text-white font-medium shadow-md hover:shadow-green-200/50"
+                  className="py-3 rounded-xl bg-widgetColor text-white font-medium shadow-md hover:shadow-green-200/50"
                 >
                   Continue to Reservation
                 </MainButton>

@@ -15,7 +15,8 @@ const ReservationWidgetWrapper = ({ locationId }) => {
         email: "",
         phone: "",
         zip: "",
-        notify: false,
+        notifyWithMessage: false,
+        notifyWithEmail: false,
         specialRequest: "",
         allergy: "",
     });
