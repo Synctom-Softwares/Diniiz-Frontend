@@ -96,6 +96,7 @@ const Settings = () => {
         await fetchUserData();
       } else {
         toast.error(response.message || "Failed to update profile");
+        console.log(`Error: ${response.message}`);
       }
     } catch (error) {
       console.error("Error updating user data:", error);
@@ -196,7 +197,7 @@ const Settings = () => {
   }, [userEmail]); // Remove fetchUserData from dependency array to avoid infinite loop
 
   return (
-    <Layout title="Settings">
+    <Layout title={"Settings"}>
       <div className="max-w-[75rem] mx-auto py-10 px-2 md:px-0">
         <div className="flex flex-col gap-8 md:gap-12">
           {/* Profile Section */}
@@ -240,8 +241,8 @@ const Settings = () => {
                 </Button>
               </div>
               {/* Info & Password Section */}
-              <div className="flex-1 flex flex-col gap-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className=" flex  flex-col w-full gap-8">
+                <div className="flex justify-around *:w-full lg:flex-row flex-col gap-8">
                   <div className="space-y-4">
                     <h2 className="font-semibold text-lg text-gray-700 mb-2">
                       Personal Info

@@ -30,11 +30,12 @@ const chartConfig = {
   },
 };
 
-
 const StaffPerLocationChart = () => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { userData: { tenantId }} = useSelector(state => state.auth)
+  const {
+    userData: { tenantId },
+  } = useSelector((state) => state.auth);
 
   useEffect(() => {
     axios
@@ -71,49 +72,67 @@ const StaffPerLocationChart = () => {
 
   if (loading) return <Loader2 size={20} className="animate-spin" />;
 
+  const isEmptyData = chartData.every((loc) => loc.noOfStaff === 0);
+
   return (
     <div className="h-full w-full flex flex-col items-center justify-around">
-      <ChartContainer
-        config={chartConfig}
-        className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0 h-full w-full"
-      >
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  hideIndicator={false}
-                  formatter={(_, name) => {
-                    const entry = chartData.find((d) => d.location === name);
-                    if (!entry) return [null];
-                    return [
-                      `${entry.location}: ${
-                        entry.noOfStaff
-                      } - ${entry.percent.toFixed(2)}%`,
-                    ];
-                  }}
+      {chartData.length == 0 ||
+        (isEmptyData && (
+          <div className="py-20 text-center text-muted-foreground">
+            No data to show
+          </div>
+        ))}
+
+      {chartData.length > 0 ||
+        (!isEmptyData && (
+          <ChartContainer
+            config={chartConfig}
+            className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0 h-full w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      hideIndicator={false}
+                      formatter={(_, name) => {
+                        const entry = chartData.find(
+                          (d) => d.location === name
+                        );
+                        if (!entry) return [null];
+                        return [
+                          `${entry.location}: ${
+                            entry.noOfStaff
+                          } - ${entry.percent.toFixed(2)}%`,
+                        ];
+                      }}
+                    />
+                  }
                 />
-              }
-            />
-            <Pie
-              data={chartData}
-              dataKey="percent"
-              nameKey="location"
-              innerRadius="60%"
-              outerRadius="80%"
-              paddingAngle={1}
-              label={false}
-              labelLine={false}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={2} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </ChartContainer>
-      <div className="flex gap-4 items-center flex-wrap">
+                <Pie
+                  data={chartData}
+                  dataKey="percent"
+                  nameKey="location"
+                  innerRadius="60%"
+                  outerRadius="80%"
+                  paddingAngle={1}
+                  label={false}
+                  labelLine={false}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.fill}
+                      strokeWidth={2}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        ))}
+      <div className="flex gap-4 items-center flex-wrap justify-center">
         {chartData.map((entry, index) => (
           <div key={index} className="flex items-center gap-2">
             <div

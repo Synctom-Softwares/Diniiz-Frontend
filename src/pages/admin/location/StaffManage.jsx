@@ -26,6 +26,7 @@ import {
   Trash2,
   Loader2,
   Search,
+  Plus,
 } from "lucide-react";
 import Layout from "@/components/common/Layout";
 import AddStaffDialog from "@/components/location/staffManage/AddStaffDialog";
@@ -198,9 +199,7 @@ export default function StaffManage() {
     try {
       await locationApi.put(`/${locationId}/staff/${staff._id}/suspend`);
       setStaffList((prev) =>
-        prev.map((s) =>
-          s._id === staff._id ? { ...s, status: "suspend" } : s
-        )
+        prev.map((s) => (s._id === staff._id ? { ...s, status: "suspend" } : s))
       );
       closeDialog();
     } catch (err) {
@@ -228,9 +227,8 @@ export default function StaffManage() {
   return (
     <Layout title={"Staff Management"}>
       <div className="p-6 bg-white rounded-3xl space-y-8 h-full">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <Button onClick={showAddDialog}>Add Staff</Button>
             <Select value={selectedStatus} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Select Status" />
@@ -243,13 +241,18 @@ export default function StaffManage() {
             </Select>
           </div>
 
-          <div className="relative flex-1 max-w-2xs">
-            <Input
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="flex items-center gap-4">
+            <Button onClick={showAddDialog}>
+              <Plus />
+              Add Staff</Button>
+            <div className="relative flex-1 max-w-2xs">
+              <Input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            </div>
           </div>
         </div>
 
@@ -257,6 +260,7 @@ export default function StaffManage() {
           open={showDialog === "add"}
           onClose={closeDialog}
           onAdd={handleStaffAdd}
+          loading={loading}
         />
         <EditStaffDialog
           open={showDialog === "edit"}
@@ -298,10 +302,13 @@ export default function StaffManage() {
                     <TableCell>
                       <Badge
                         variant="secondary"
-                        className={cn("text-white px-4 py-1 rounded-full capitalize", {
-                          "bg-status-active": staff.status === "active",
-                          "bg-status-suspended": staff.status == "suspend",
-                        })}
+                        className={cn(
+                          "text-white px-4 py-1 rounded-full capitalize",
+                          {
+                            "bg-status-active": staff.status === "active",
+                            "bg-status-suspended": staff.status == "suspend",
+                          }
+                        )}
                       >
                         {staff.status}
                       </Badge>

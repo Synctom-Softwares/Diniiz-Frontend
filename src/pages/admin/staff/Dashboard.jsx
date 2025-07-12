@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/table";
 import PaginationControls from "@/components/common/PaginationControls";
 import { usePagination } from "@/hooks/use-pagination";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { getBadgeColor } from "@/lib";
+import Updates from "@/components/staff/Updates";
 
 const staffTableColumns = [
   { key: "customer", label: "Customer" },
@@ -57,9 +61,9 @@ function Dashboard() {
   }, [userData]);
 
   return (
-    // <Layout title="Dashboard">
-      <div className="w-full gap-4 mt-14 *:rounded-3xl">
-        <div className="md:col-span-3 min-h-32 p-6 bg-white border">
+    <Layout title="Dashboard">
+      <div className="w-full flex flex-wrap gap-4 max-w-7xl *:rounded-3xl">
+        <div className="min-h-32 p-6 bg-white border grow">
           <h3 className="text-lg font-semibold mb-2 text-left">
             Assigned Reservations & Tables
           </h3>
@@ -91,11 +95,25 @@ function Dashboard() {
                     </TableCell>
                     <TableCell>{row.time}</TableCell>
                     <TableCell>
-                      {Array.isArray(row.tableId)
-                        ? row.tableId.join(", ")
-                        : row.tableId}
+                      {Array.isArray(row.tableId) ? (
+                        row.tableId.map((id) => (
+                          <Badge variant="outline" key={id}>
+                            {id.split("-")[1]}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline">
+                          {row.tableId.split("-")[1]}
+                        </Badge>
+                      )}
                     </TableCell>
-                    <TableCell>{row.status}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={cn("capitalize", getBadgeColor(row.status))}
+                      >
+                        {row.status}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{row.specialRequests || "-"}</TableCell>
                     <TableCell>{row.allergies || "-"}</TableCell>
                   </TableRow>
@@ -116,8 +134,11 @@ function Dashboard() {
             showLabel={true}
           />
         </div>
+        <div className="bg-white border min-h-72 w-sm">
+          <Updates />
+        </div>
       </div>
-    // </Layout>
+    </Layout>
   );
 }
 

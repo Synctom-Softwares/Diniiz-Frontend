@@ -10,26 +10,17 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function AddStaffDialog({
   open,
   onClose,
-  locations,
-  onSubmit,
+  onAdd,
   isLoading,
 }) {
   const [form, setForm] = useState({
     name: "",
-    password: "",
-    locationId: "",
+    password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,15 +29,11 @@ export default function AddStaffDialog({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await onSubmit(form);
-      setForm({ name: "", password: "", locationId: "" });
+      await onAdd(form.name, form.password);
+      setForm({ name: "", password: "" });
       onClose();
     } catch (error) {
       console.log(error?.message)
@@ -96,25 +83,6 @@ export default function AddStaffDialog({
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </Button>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Select
-              value={form.locationId}
-              onValueChange={(value) => handleSelectChange("locationId", value)}
-              required
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations?.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>

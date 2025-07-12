@@ -56,7 +56,6 @@ const EditStaffDialog = ({ open, onClose, staff, onUpdated }) => {
       if (!locationId) return;
       
       try {
-
         // TODO: Combine working with /:locationId/tables/unAssigedTables
         const res = await locationApi.get(`/${locationId}/tables`);
         const mappedTables = (res?.tables || []).map((table) => ({

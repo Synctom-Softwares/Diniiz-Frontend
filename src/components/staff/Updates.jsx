@@ -17,6 +17,11 @@ const Updates = () => {
       <h2 className="pb-2 text-black/70 font-semibold text-center">
         Recent Updates
       </h2>
+      {
+        notifications.length == 0 && <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+          No recent updates
+        </div> 
+      }
       {notifications.length > 0 && (
         <ScrollArea className="h-74 md:h-full">
           <div className="grid gap-0.5">

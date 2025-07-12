@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Api from "@/config/api";
 import Layout from "@/components/common/Layout";
-import { SearchAndFilters } from "@/components/location/guestbook/SearchAndFilter";
-import { CustomerTable } from "@/components/location/guestbook/CustomerTable";
-import { CustomerDetailsDialog } from "@/components/location/guestbook/CutomerDetailsDialog";
+import { SearchAndFilters } from "@/components/tenant/guestbook/SearchAndFilter";
+import { CustomerTable } from "@/components/tenant/guestbook/CustomerTable";
+import tenantApi from "@/config/tenantApi";
+import { CustomerDetailsDialog } from "@/components/tenant/guestbook/CutomerDetailsDialog";
 
 function GuestBook() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -12,16 +12,15 @@ function GuestBook() {
   const [clientTypeFilter, setClientTypeFilter] = useState("all");
   const [lastVisitFilter, setLastVisitFilter] = useState("all");
   const [customers, setCustomers] = useState([]);
-  
+
   const {
-    userData: { locationId },
+    userData: { locationId, tenantId },
   } = useSelector((state) => state.auth);
-  
-  const customersApi = new Api(`/api/locations/${locationId}`);
+
   useEffect(() => {
     async function fetchCustomers() {
       try {
-        const response = await customersApi.get(`/customers`);
+        const response = await tenantApi.get(`/${tenantId}/customers`);
         const data = response?.data || response;
         setCustomers(data.customers || []);
       } catch (error) {
@@ -59,7 +58,7 @@ function GuestBook() {
 
   return (
     <Layout title="Guestbook">
-      <div className="p-3 bg-background rounded-3xl ">
+      <div className="p-3 bg-background rounded-3xl overflow-x-auto">
         <SearchAndFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}

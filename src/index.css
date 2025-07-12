@@ -289,4 +289,8 @@
   h4 {
     font-family: "Playfair Display";
   }
+
+  button {
+    cursor: pointer;
+  }
 }

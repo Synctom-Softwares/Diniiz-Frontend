@@ -18,7 +18,7 @@ const Updates = () => {
         Recent Updates
       </h2>
       {notifications.length === 0 && (
-        <div className="h-full flex items-center justify-center text-lg text-muted-foreground">
+        <div className="h-full flex items-center justify-center text-lg text-muted-foreground py-20">
           No Recent Notifications
         </div>
       )}

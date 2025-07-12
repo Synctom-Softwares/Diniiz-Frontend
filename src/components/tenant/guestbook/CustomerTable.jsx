@@ -41,6 +41,8 @@ export function CustomerTable({
     }
   }, [restartPagination, setPage]);
 
+  
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -51,12 +53,13 @@ export function CustomerTable({
 
   return (
     <div className="bg-white rounded-lg">
-      <Table>
+      <Table className="table-auto">
         <TableHeader>
           <TableRow className="*:text-muted-foreground">
             <TableHead>Customer Name</TableHead>
             <TableHead>Phone Number</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Location</TableHead>
             <TableHead>Last Visited</TableHead>
             <TableHead>Customer Type</TableHead>
             <TableHead className="w-20"></TableHead>
@@ -88,6 +91,7 @@ export function CustomerTable({
               <TableCell className="py-4 border-muted">
                 {customer.customerEmail}
               </TableCell>
+              <TableCell>{customer.location?.locationName || "N/A"}</TableCell>
               <TableCell className="py-4 border-muted">
                 {formatDate(customer.lastVisit)}
               </TableCell>

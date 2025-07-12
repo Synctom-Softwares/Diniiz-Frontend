@@ -90,7 +90,7 @@ const ReservationsTable = () => {
         <TableBody>
           {paginatedData.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center">
+              <TableCell colSpan={6} className="text-center py-20 text-muted-foreground text-lg">
                 No data available
               </TableCell>
             </TableRow>

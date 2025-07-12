@@ -35,6 +35,8 @@ const LocationForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Time Format Selection */}
+      {console.log("Time Format", formData)}
+
       <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
         <Label className="text-base font-semibold">Time Format</Label>
         <RadioGroup
@@ -81,6 +83,19 @@ const LocationForm = ({
           disabled={isLoading}
         />
       </div>
+      {/* Location Phone Number */}
+      <div className="space-y-2">
+        <Label htmlFor="locationPhone">Phone#</Label>
+        <Input
+          id="locationPhone"
+          name="locationPhone"
+          value={formData.locationPhone}
+          onChange={handleInputChange}
+          placeholder="Enter Location Phone Number"
+          required
+          disabled={isLoading}
+        />
+      </div>
 
       {/* Admin Email */}
       {!editingLocation && (
@@ -89,7 +104,6 @@ const LocationForm = ({
           <Input
             id="adminEmail"
             name="adminEmail"
-            type="email"
             value={formData.adminEmail}
             onChange={handleInputChange}
             placeholder="Enter admin email"
@@ -203,14 +217,18 @@ const LocationForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomTimePicker
               label="From"
-              value="07:00"
+              value={
+                formData.mealTimings?.breakfast?.from || formData.breakfastFrom
+              }
               onChange={(value) => handleTimeChange("breakfastFrom", value)}
               format={timeFormat}
               disabled={isLoading}
             />
             <CustomTimePicker
               label="To"
-              value="12:00"
+              value={
+                formData.mealTimings?.breakfast?.to || formData.breakfastTo
+              }
               onChange={(value) => handleTimeChange("breakfastTo", value)}
               format={timeFormat}
               disabled={isLoading}
@@ -228,14 +246,14 @@ const LocationForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomTimePicker
               label="From"
-              value="15:00"
+              value={formData.mealTimings?.lunch?.from || formData.lunchFrom}
               onChange={(value) => handleTimeChange("lunchFrom", value)}
               format={timeFormat}
               disabled={isLoading}
             />
             <CustomTimePicker
               label="To"
-              value="18:00"
+              value={formData.mealTimings?.lunch?.to || formData.lunchTo}
               onChange={(value) => handleTimeChange("lunchTo", value)}
               format={timeFormat}
               disabled={isLoading}
@@ -251,14 +269,14 @@ const LocationForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CustomTimePicker
               label="From"
-              value="19:00"
+              value={formData.mealTimings?.dinner?.from || formData.dinnerFrom}
               onChange={(value) => handleTimeChange("dinnerFrom", value)}
               format={timeFormat}
               disabled={isLoading}
             />
             <CustomTimePicker
               label="To"
-              value="21:00"
+              value={formData.mealTimings?.dinner?.to || formData.dinnerTo}
               onChange={(value) => handleTimeChange("dinnerTo", value)}
               format={timeFormat}
               disabled={isLoading}
@@ -274,7 +292,7 @@ const LocationForm = ({
 
       {/* Turn Over */}
       <div className="space-y-3">
-        <Label>Turn Over</Label>
+        <Label>Grace Period</Label>
         <RadioGroup
           value={String(formData.turnOverTime)}
           onValueChange={(value) => handleSelectChange("turnOverTime", value)}

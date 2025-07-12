@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, Phone, User2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import {
   Dialog,
   DialogContent,
@@ -15,8 +14,8 @@ import {
 import { toast } from "react-toastify";
 import Api from "@/config/api";
 import { useSelector } from "react-redux";
-import Layout from "@/components/common/Layout";
 import SectionFive from "@/components/landingPageComponents/section5/SectionFive";
+import Layout from "@/components/common/Layout";
 
 const Settings = () => {
   const { userData } = useSelector((state) => state.auth);
@@ -38,11 +37,10 @@ const Settings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  // Change password handler
-  // Remove handleChangePassword, move logic to updateTenantData
   const fileInputRef = useRef(null);
 
   const tenantApi = new Api("/api/tenants");
+  const getUser = new Api("/api/users");
 
   const tenantId = userData.tenantId;
   const fetchTenantData = async () => {
@@ -58,9 +56,12 @@ const Settings = () => {
       }
 
       // Fetch tenant profile
-      const response = await tenantApi.getById("", tenantId);
+      const response = await getUser.get("/check", {
+        email: userData.email,
+      });
+      console.log("Tenant Data Response:", response);
       if (response.success) {
-        const data = response.data || response.tenant;
+        const data = response.user || response.tenant;
         setTenantData(data);
         setFormData({
           firstName: data.firstName || data.tenantName?.split(" ")[0] || "",
@@ -124,7 +125,8 @@ const Settings = () => {
 
       // Prepare update data (exclude empty password fields)
       const updateData = {
-        tenantName: formData.firstName + " " + formData.lastName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         phone: formData.phone,
       };
 
@@ -183,7 +185,7 @@ const Settings = () => {
         }
       }
 
-      const response = await tenantApi.put("", tenantId, updateData);
+      const response = await getUser.put(`/${userData._id}`, "", updateData);
 
       if (response.success) {
         toast.success("Profile updated successfully");
@@ -256,12 +258,12 @@ const Settings = () => {
   }, []);
 
   return (
-    <Layout title="Settings">
+    <Layout title={"Settings"}>
       <div className="max-w-[75rem] mx-auto py-10 px-2 md:px-0">
         <div className="flex flex-col gap-8 md:gap-12">
           {/* Profile Section */}
           <Card className="rounded-2xl p-6 md:p-10 shadow-xs">
-            <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start">
+            <div className="flex flex-col lg:flex-row gap-8 md:gap-12 items-center lg:items-start">
               {/* Avatar & Edit Button */}
               <div className="flex flex-col items-center gap-4 md:w-1/4">
                 <div className="size-32 rounded-full border overflow-hidden">
@@ -300,8 +302,8 @@ const Settings = () => {
                 </Button>
               </div>
               {/* Info & Password Section */}
-              <div className="flex-1 flex flex-col gap-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className=" flex  flex-col w-full gap-8">
+                <div className="flex justify-around *:w-full lg:flex-row flex-col gap-8">
                   <div className="space-y-4">
                     <h2 className="font-semibold text-lg text-gray-700 mb-2">
                       Personal Info

@@ -50,6 +50,7 @@ const Location = () => {
     locationName: "",
     address: "",
     timeZone: "",
+    locationPhone: "",
     openingTime: "",
     closingTime: "",
     turnOverTime: 30,
@@ -79,6 +80,82 @@ const Location = () => {
     { label: "Party Size", value: "{{party_size}}" },
     { label: "Location Name", value: "{{location_name}}" },
     { label: "Location Address", value: "{{location_address}}" },
+  ];
+
+  // French timezones with their territories and GMT offsets
+  const frenchTimezones = [
+    {
+      value: "Europe/Paris",
+      label: "Metropolitan France (Paris) - GMT+1/+2",
+      territory: "Metropolitan France",
+      offset: "GMT+1 (GMT+2 in summer)",
+    },
+    {
+      value: "America/Guadeloupe",
+      label: "Guadeloupe - GMT-4",
+      territory: "Guadeloupe",
+      offset: "GMT-4",
+    },
+    {
+      value: "America/Martinique",
+      label: "Martinique - GMT-4",
+      territory: "Martinique",
+      offset: "GMT-4",
+    },
+    {
+      value: "America/Cayenne",
+      label: "French Guiana (Cayenne) - GMT-3",
+      territory: "French Guiana",
+      offset: "GMT-3",
+    },
+    {
+      value: "Indian/Reunion",
+      label: "Réunion - GMT+4",
+      territory: "Réunion",
+      offset: "GMT+4",
+    },
+    {
+      value: "Indian/Mayotte",
+      label: "Mayotte - GMT+3",
+      territory: "Mayotte",
+      offset: "GMT+3",
+    },
+    {
+      value: "Pacific/Noumea",
+      label: "New Caledonia (Nouméa) - GMT+11",
+      territory: "New Caledonia",
+      offset: "GMT+11",
+    },
+    {
+      value: "Pacific/Tahiti",
+      label: "French Polynesia (Tahiti) - GMT-10",
+      territory: "French Polynesia - Society Islands",
+      offset: "GMT-10",
+    },
+    {
+      value: "Pacific/Marquesas",
+      label: "French Polynesia (Marquesas) - GMT-9:30",
+      territory: "French Polynesia - Marquesas Islands",
+      offset: "GMT-9:30",
+    },
+    {
+      value: "Pacific/Gambier",
+      label: "French Polynesia (Gambier) - GMT-9",
+      territory: "French Polynesia - Gambier Islands",
+      offset: "GMT-9",
+    },
+    {
+      value: "America/Miquelon",
+      label: "Saint Pierre and Miquelon - GMT-3/-2",
+      territory: "Saint Pierre and Miquelon",
+      offset: "GMT-3 (GMT-2 in summer)",
+    },
+    {
+      value: "Pacific/Wallis",
+      label: "Wallis and Futuna - GMT+12",
+      territory: "Wallis and Futuna",
+      offset: "GMT+12",
+    },
   ];
 
   // Helper function to convert time to 24h format for comparison
@@ -128,7 +205,7 @@ const Location = () => {
       try {
         setIsLoading(true);
         const response = await locationApi.get("");
-        console.log(response);
+        console.log("All locations", response);
         if (response && response.locations) {
           console.log(response.locations);
           setLocations(response.locations);
@@ -149,19 +226,9 @@ const Location = () => {
     }
   }, [tenantId]);
 
-  // Get timezones using moment-timezone
+  // Set French timezones instead of fetching all timezones
   useEffect(() => {
-    const tzNames = moment.tz.names();
-    const remainingTimezones = tzNames.map((tz) => {
-      const offset = moment.tz(tz).format("Z");
-      const abbreviation = moment.tz(tz).format("z");
-      return {
-        value: tz,
-        label: `${tz.replace(/_/g, " ")} (${abbreviation} ${offset})`,
-        offset: offset,
-      };
-    });
-    setTimezones(remainingTimezones);
+    setTimezones(frenchTimezones);
   }, []);
 
   // Debounced check for adminEmail
@@ -342,6 +409,7 @@ const Location = () => {
       locationName: "",
       address: "",
       timeZone: "",
+      locationPhone: "",
       openingTime: "",
       closingTime: "",
       turnOverTime: 30,
@@ -365,18 +433,19 @@ const Location = () => {
     setFormData({
       locationName: location.locationName || "",
       address: location.address || "",
+      locationPhone: location.locationPhone || "",
       timeZone: location.timeZone || "",
       openingTime: location.openingTime || "",
       closingTime: location.closingTime || "",
       turnOverTime: location.turnOverTime || 30,
       adminEmail: location.adminEmail || "",
       smsTemplate: location.smsTemplate || "",
-      breakfastFrom: location.breakfastFrom || "",
-      breakfastTo: location.breakfastTo || "",
-      lunchFrom: location.lunchFrom || "",
-      lunchTo: location.lunchTo || "",
-      dinnerFrom: location.dinnerFrom || "",
-      dinnerTo: location.dinnerTo || "",
+      breakfastFrom: location.mealTimings?.breakfast?.start || "",
+      breakfastTo: location.mealTimings?.breakfast?.end || "",
+      lunchFrom: location.mealTimings?.lunch?.start || "",
+      lunchTo: location.mealTimings?.lunch?.end || "",
+      dinnerFrom: location.mealTimings?.dinner?.start || "",
+      dinnerTo: location.mealTimings?.dinner?.end || "",
     });
     setAdminEmailError("");
     setMealTimingErrors({});
@@ -394,7 +463,7 @@ const Location = () => {
 
     try {
       setIsLoading(true);
-      const deleteApi = new Api(`/api/tenants/${tenantId}/locations`);
+      const deleteApi = new Api(`/api/locations`);
       await deleteApi.delete("", deleteLocationId);
       setLocations((prev) =>
         prev.filter((location) => location._id !== deleteLocationId)
@@ -440,16 +509,16 @@ const Location = () => {
     // Build mealTimings object
     const mealTimings = {
       breakfast: {
-        start: convertTo24Hour(formData.breakfastFrom) || "07:00",
-        end: convertTo24Hour(formData.breakfastTo) || "10:00",
+        start: convertTo24Hour(formData.breakfastFrom),
+        end: convertTo24Hour(formData.breakfastTo),
       },
       lunch: {
-        start: convertTo24Hour(formData.lunchFrom) || "12:00",
-        end: convertTo24Hour(formData.lunchTo) || "15:00",
+        start: convertTo24Hour(formData.lunchFrom),
+        end: convertTo24Hour(formData.lunchTo),
       },
       dinner: {
-        start: convertTo24Hour(formData.dinnerFrom) || "18:00",
-        end: convertTo24Hour(formData.dinnerTo) || "22:00",
+        start: convertTo24Hour(formData.dinnerFrom),
+        end: convertTo24Hour(formData.dinnerTo),
       },
     };
 
@@ -459,7 +528,8 @@ const Location = () => {
       address: formData.address,
       openingTime: convertTo24Hour(formData.openingTime),
       closingTime: convertTo24Hour(formData.closingTime),
-      timeZone: formData.timeZone || "France/Paris",
+      locationPhone: formData.locationPhone,
+      timeZone: formData.timeZone || "Europe/Paris",
       turnOverTime: Number(formData.turnOverTime),
       smsTemplate: formData.smsTemplate || "New location has been created!",
       status: "active",
@@ -531,9 +601,17 @@ const Location = () => {
     setTimeFormat("24h"); // Reset format on close
   };
 
-  // Helper function to format timezone display
+  // Helper function to format timezone display - updated for French timezones
   const formatTimezoneDisplay = (timezone) => {
     if (!timezone) return "";
+
+    // Find the timezone in our French timezones array
+    const frenchTz = frenchTimezones.find((tz) => tz.value === timezone);
+    if (frenchTz) {
+      return frenchTz.label;
+    }
+
+    // Fallback to moment formatting if not found in French timezones
     const offset = moment.tz(timezone).format("Z");
     const abbreviation = moment.tz(timezone).format("z");
     return `${timezone.replace(/_/g, " ")} (${abbreviation} ${offset})`;
@@ -631,6 +709,9 @@ const Location = () => {
                   <TableHead className="min-w-[150px] md:w-[250px]">
                     Address
                   </TableHead>
+                  <TableHead className="min-w-[150px] md:w-[200px]">
+                    Phone#
+                  </TableHead>
                   <TableHead className="min-w-[120px] md:w-[150px]">
                     Time Zone
                   </TableHead>
@@ -668,7 +749,10 @@ const Location = () => {
                       <TableCell className="max-w-[200px] truncate">
                         {location.address}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="max-w-[150px] truncate">
+                        {location.locationPhone || "N/A"}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">
                         {formatTimezoneDisplay(
                           location.timeZone || location.timezone
                         )}

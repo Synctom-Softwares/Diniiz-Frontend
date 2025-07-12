@@ -51,7 +51,7 @@ const PaginationControls = ({
                   className={cn(
                     "cursor-pointer bg-muted hover:bg-white",
                     currentPage === pageNum &&
-                      "bg-violet text-white hover:bg-violet"
+                      "bg-primary text-white hover:bg-primary"
                   )}
                 >
                   {pageNum}

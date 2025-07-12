@@ -21,6 +21,7 @@ import {
   UserRoundMinus,
   UserRoundPlus,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { usePagination } from "@/hooks/use-pagination";
@@ -261,7 +262,9 @@ function StaffManage() {
             </div>
 
             <div className="flex gap-1">
-              <Button onClick={() => handleShowDialog("add")}>Add Staff</Button>
+              <Button onClick={() => handleShowDialog("add")}>
+                <Plus />
+                Add Staff</Button>
               <div className="relative flex-1 min-w-42 max-w-2xs">
                 <Input
                   placeholder="Search..."

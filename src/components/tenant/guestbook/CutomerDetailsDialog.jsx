@@ -17,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, TriangleAlert } from "lucide-react";
 import {
   Tooltip,
@@ -32,10 +31,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import locationApi from "@/config/locationApi";
 import { useSelector } from "react-redux";
 import { cn } from "@/lib/utils";
 import { getBadgeColor } from "@/lib";
+import tenantApi from "@/config/tenantApi";
 import { toast } from "react-toastify";
 
 export function CustomerDetailsDialog({
@@ -55,7 +54,7 @@ export function CustomerDetailsDialog({
   });
 
   const {
-    userData: { locationId },
+    userData: { locationId, tenantId },
   } = useSelector((state) => state.auth);
 
   const [history, setHistory] = useState([]);
@@ -65,10 +64,7 @@ export function CustomerDetailsDialog({
     async function fetchCustomerDetails() {
       if (!customer) return;
       try {
-        const res = await locationApi.get(
-          `/${locationId}/customers/${customer}`
-        );
-        console.log(res);
+        const res = await tenantApi.get(`/${tenantId}/customers/${customer}`);
         if (res.success) {
           const c = res.customer;
           setFormData({
@@ -89,7 +85,7 @@ export function CustomerDetailsDialog({
       }
     }
     fetchCustomerDetails();
-  }, [customer, locationId]);
+  }, [customer, locationId, tenantId]);
 
   if (!customer) return null;
 
@@ -105,23 +101,20 @@ export function CustomerDetailsDialog({
       };
 
       if (!formData.customerPhone || !formData.customerType) {
-        toast.error("Phone number cannot be blank.")
+        toast.error("Phone number cannot be blank.");
+        onOpenChange(false);
         return;
       }
 
-      await locationApi.put(
-        `/${locationId}/customers/${customer}`,
-        "",
-        updateData
-      );
+      await tenantApi.put(`/${tenantId}/customers/${customer}`, "", updateData);
 
       // for optimistic update
       updateCustomers(
         customers.map((c) => (c._id === customer ? { ...c, ...updateData } : c))
       );
     } catch (err) {
-      console.error(err);
-      toast.error(err?.message || "Phone Number cannot be blank.")
+      toast.error(err?.message || "Failed to update");
+      updateCustomers(customers);
     }
     onOpenChange(false);
   };
@@ -313,7 +306,7 @@ export function CustomerDetailsDialog({
             >
               Download CSV
             </Button>
-            <Button disabled className="rounded-full">
+            <Button className="rounded-full" disabled>
               Download PDF
             </Button>
           </div>

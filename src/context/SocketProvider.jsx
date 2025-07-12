@@ -23,25 +23,51 @@ const SocketProvider = ({ children }) => {
       },
     });
 
-    newSocket.on("connect", () => {
-      console.log("CONNECTED:", newSocket.id);
+    const listeners = [
+      ["connect", () => console.log("CONNECTED:", newSocket.id)],
+      ["disconnect", () => console.log("DISCONNECTED")],
+      ["online-users", (users) => console.log("Online users:", users)],
+      ["socket-testing", () => console.log("socket-test")],
+      ["plan-bought", () => fireSocketEventCallbacks("plan-bought")],
+      ["new-booking", () => fireSocketEventCallbacks("new-booking")],
+    ];
+
+    // newSocket.on("connect", () => {
+    //   console.log("CONNECTED:", newSocket.id);
+    // });
+
+    // newSocket.on("disconnect", () => {
+    //   console.log("DISCONNECTED");
+    // });
+
+    // newSocket.on("online-users", (users) => {
+    //   console.log("Online users:", users);
+    // });
+
+    // newSocket.on("socket-testing", () => {
+    //   fireSocketEventCallbacks("socket-test");
+    // });
+
+    // newSocket.on("plan-bought", () => {
+    //   fireSocketEventCallbacks("plan-bought");
+    // });
+
+    // newSocket.on("new-booking", () => {
+    //   fireSocketEventCallbacks("new-booking");
+    // });
+
+    listeners.forEach(([event, handler]) => {
+      newSocket.on(event, handler);
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("DISCONNECTED");
-    });
-
-    newSocket.on("online-users", (users) => {
-      console.log("Online users:", users);
-    });
-
-    newSocket.on("socket-testing", () => {
-      fireSocketEventCallbacks("socket-test")
-    });
-    
     setSocket(newSocket);
     console.log("SOCKET CREATION", newSocket);
-    return () => newSocket.disconnect();
+    return () => {
+      listeners.forEach(([event, handler]) => {
+        newSocket.off(event, handler);
+      });
+      newSocket.disconnect();
+    };
   }, [isInitialized, token]);
 
   return (

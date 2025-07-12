@@ -3,6 +3,7 @@ import StatsCard from "@/components/common/StatsCard";
 import superAdminApi from "@/config/superAdminApi";
 import useSocketEvent from "@/hooks/use-socket-event";
 
+
 const AdminMetrics = () => {
   const [metrics, setMetrics] = useState({
     tenants: {
@@ -14,7 +15,6 @@ const AdminMetrics = () => {
       comparison: { change: "0%", trend: "increase" },
     },
   });
-
   const fetchMetrics = async () => {
     try {
       const response = await superAdminApi.get("/monthly-metrics");
@@ -50,7 +50,7 @@ const AdminMetrics = () => {
     },
     {
       id: 3,
-      stat: 3,
+      stat: 0,
       heading: "Pending Chats",
     },
   ];
